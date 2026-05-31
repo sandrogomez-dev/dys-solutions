@@ -1279,76 +1279,97 @@
   function hideLoader() { loadingEl.classList.add('ready'); }
   video.addEventListener('canplay', hideLoader, { once: true });
 
-  /* ── Inicialización ──────────────────────────────── */
-  function init() {
-    const dur = video.duration; // 19.0 s exactos
+  /* ── Detección de dispositivo ──────────────────────
+   *
+   * El scrubbing de video.currentTime vía scroll táctil es inviable
+   * en mobile: iOS limita las actualizaciones y el jitter de inertia
+   * causa jank severo. Bifurcamos la experiencia:
+   *
+   *  · Desktop (pointer fino, >1024px) → scroll-driven con GSAP scrub
+   *  · Mobile / Tablet                 → autoplay + timeline temporizado
+   */
+  const isMobile = window.matchMedia(
+    '(max-width: 1024px), (pointer: coarse)'
+  ).matches;
 
-    /*
-     * Convierte segundos del vídeo a posición normalizada [0–1].
-     * Permite alinear video.currentTime y tl.progress() con
-     * la misma referencia de tiempo.
-     */
-    const p = (sec) => sec / dur;
+  /* ── COMÚN: construcción del timeline de paneles ────
+   *
+   * En desktop recibe tiempos normalizados [0-1] y se controla
+   * con tl.progress(). En mobile recibe segundos reales y corre solo.
+   */
+  function buildPanelTimeline(useSeconds, dur) {
+    /* pos(s) → posición en el timeline */
+    const pos = useSeconds ? (s) => s : (s) => s / dur;
 
-    /* Timeline GSAP — pausado, controlado por scroll */
-    const tl = gsap.timeline({ paused: true });
+    const tl = gsap.timeline({ paused: !useSeconds });
 
-    /*
-     * MAPA TEMPORAL (vídeo 19 s | 3 transiciones de 5 s):
-     *
-     *  0.0 s  Panel 1 aparece        1.0 s  Panel 1 sale
-     *  1.0 – 6.0 s  Transición #1
-     *  5.7 s  Panel 2 aparece        7.0 s  Panel 2 sale
-     *  7.0 – 12.0 s  Transición #2
-     * 11.7 s  Panel 3 aparece       13.0 s  Panel 3 sale
-     * 13.0 – 18.0 s  Transición #3
-     * 17.7 s  Panel 4 aparece — permanece hasta el final (19 s)
-     */
-
-    /* Panel 1 */
     tl.fromTo('#panel-1',
       { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.45) },
-      p(0)
-    );
-    tl.to('#panel-1',
-      { opacity: 0, y: -46, ease: 'power2.in', duration: p(0.55) },
-      p(1.0)
-    );
-
-    /* Panel 2 — entra 0.4 s antes para reducir zona muerta */
-    tl.fromTo('#panel-2',
+      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.45 : 0.45 / dur },
+      pos(0)
+    ).to('#panel-1',
+      { opacity: 0, y: -46, ease: 'power2.in', duration: useSeconds ? 0.55 : 0.55 / dur },
+      pos(1.0)
+    ).fromTo('#panel-2',
       { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.45) },
-      p(5.3)
-    );
-    tl.to('#panel-2',
-      { opacity: 0, y: -46, ease: 'power2.in', duration: p(0.55) },
-      p(7.0)
-    );
-
-    /* Panel 3 — entra 0.4 s antes */
-    tl.fromTo('#panel-3',
+      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.45 : 0.45 / dur },
+      pos(5.3)
+    ).to('#panel-2',
+      { opacity: 0, y: -46, ease: 'power2.in', duration: useSeconds ? 0.55 : 0.55 / dur },
+      pos(7.0)
+    ).fromTo('#panel-3',
       { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.45) },
-      p(11.3)
-    );
-    tl.to('#panel-3',
-      { opacity: 0, y: -46, ease: 'power2.in', duration: p(0.55) },
-      p(13.0)
-    );
-
-    /* Panel 4 — entra 0.4 s antes, permanece */
-    tl.fromTo('#panel-4',
+      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.45 : 0.45 / dur },
+      pos(11.3)
+    ).to('#panel-3',
+      { opacity: 0, y: -46, ease: 'power2.in', duration: useSeconds ? 0.55 : 0.55 / dur },
+      pos(13.0)
+    ).fromTo('#panel-4',
       { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.75) },
-      p(17.3)
+      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.75 : 0.75 / dur },
+      pos(17.3)
     );
 
-    /* Ancla el final del timeline en exactamente 1.0 */
-    tl.set({}, {}, 1);
+    if (!useSeconds) tl.set({}, {}, 1); /* ancla el final en 1.0 para desktop */
 
-    /* ── ScrollTrigger ──────────────────────────────── */
+    return tl;
+  }
+
+  /* ══════════════════════════════════════════════════
+     MOBILE — autoplay + timeline temporizado en segundos reales
+     Sin pin, sin scrubbing. El vídeo corre a 1× velocidad
+     y el texto se sincroniza mediante timestamps reales.
+  ══════════════════════════════════════════════════ */
+  function initAutoplay() {
+    video.loop = true;
+    video.play().catch(() => {});
+
+    /* Timeline corre automáticamente en tiempo real */
+    buildPanelTimeline(true, null);
+
+    /* Contador + barra de progreso sincronizados con el vídeo */
+    video.addEventListener('timeupdate', function () {
+      const t   = video.currentTime;
+      const dur = video.duration || 19;
+
+      progressEl.style.width = `${Math.min((t / dur) * 100, 100)}%`;
+
+      let idx = 0;
+      if      (t >= 17.3) idx = 3;
+      else if (t >= 11.3) idx = 2;
+      else if (t >=  5.3) idx = 1;
+      const label = String(idx + 1).padStart(2, '0');
+      if (counterEl.textContent !== label) counterEl.textContent = label;
+    });
+  }
+
+  /* ══════════════════════════════════════════════════
+     DESKTOP — scroll-driven con GSAP ScrollTrigger + scrub
+  ══════════════════════════════════════════════════ */
+  function initScrollytelling() {
+    const dur = video.duration;
+    const tl  = buildPanelTimeline(false, dur);
+
     ScrollTrigger.create({
       trigger     : '#pin-stage',
       pin         : true,
@@ -1360,20 +1381,16 @@
       onUpdate(self) {
         const progress = self.progress;
 
-        /* 1. Sincroniza el fotograma del vídeo con el scroll */
         const target = progress * dur;
         if (Math.abs(video.currentTime - target) > 0.04) {
           video.currentTime = target;
         }
 
-        /* 2. Avanza el timeline de textos */
         tl.progress(progress);
 
-        /* 3. Barra de progreso */
         progressEl.style.width = `${progress * 100}%`;
         progressEl.setAttribute('aria-valuenow', Math.round(progress * 100));
 
-        /* 4. Contador — refleja el servicio activo o próximo */
         const t = progress * dur;
         let idx = 0;
         if      (t >= 17.3) idx = 3;
@@ -1382,22 +1399,28 @@
         const label = String(idx + 1).padStart(2, '0');
         if (counterEl.textContent !== label) counterEl.textContent = label;
 
-        /* 5. Ocultar/mostrar indicador de scroll */
         if (progress > 0.015) scrollHint.classList.add('hidden');
         else scrollHint.classList.remove('hidden');
       }
     });
 
-    /* Recalcula pin al rotar el dispositivo o redimensionar */
     window.addEventListener('resize', () => ScrollTrigger.refresh(), { passive: true });
   }
 
-  /* Punto de entrada: detecta si los metadatos ya están disponibles (caché) */
-  if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+  /* ── Punto de entrada ──────────────────────────── */
+  function onReady() {
     hideLoader();
-    init();
+    if (isMobile) {
+      initAutoplay();
+    } else {
+      initScrollytelling();
+    }
+  }
+
+  if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    onReady();
   } else {
-    video.addEventListener('loadedmetadata', () => { hideLoader(); init(); }, { once: true });
+    video.addEventListener('loadedmetadata', onReady, { once: true });
   }
 
 })();
