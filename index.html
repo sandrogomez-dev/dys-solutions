@@ -976,10 +976,6 @@
        aria-valuemax="100"
        aria-label="Progreso de la experiencia"></div>
 
-  <div id="scroll-hint" aria-hidden="true">
-    <span>Scroll</span>
-    <div class="scroll-chevron"></div>
-  </div>
 
 </div><!-- /pin-stage -->
 
@@ -1243,111 +1239,42 @@
      GSAP 3.12.5 + ScrollTrigger
 ════════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
 <script>
 (function () {
   'use strict';
 
-  gsap.registerPlugin(ScrollTrigger);
-
   const video      = document.getElementById('hero-video');
   const loadingEl  = document.getElementById('loading-overlay');
   const progressEl = document.getElementById('progress-bar');
-  const scrollHint = document.getElementById('scroll-hint');
   const counterEl  = document.getElementById('counter-current');
 
-  /* 3 alturas de viewport de scroll para los 19 s del vídeo */
-  const SCROLL_VH = 3;
-
-  /*
-   * iOS Safari bloquea la manipulación de currentTime
-   * hasta que el elemento <video> haya recibido un play() explícito.
-   * Resolvemos en la primera interacción del usuario.
-   */
-  let unlocked = false;
-  function unlockVideo() {
-    if (unlocked) return;
-    unlocked = true;
-    const p = video.play();
-    if (p) p.then(() => { video.pause(); video.currentTime = 0; }).catch(() => {});
-  }
-  document.addEventListener('touchstart',  unlockVideo, { once: true, passive: true });
-  document.addEventListener('pointerdown', unlockVideo, { once: true });
-
-  /* Ocultar loader tan pronto el navegador tenga buffer suficiente */
+  /* Ocultar loader en cuanto haya buffer suficiente para reproducir */
   function hideLoader() { loadingEl.classList.add('ready'); }
   video.addEventListener('canplay', hideLoader, { once: true });
 
-  /* ── Detección de dispositivo ──────────────────────
+  /* ── Init — autoplay universal ─────────────────────
    *
-   * El scrubbing de video.currentTime vía scroll táctil es inviable
-   * en mobile: iOS limita las actualizaciones y el jitter de inertia
-   * causa jank severo. Bifurcamos la experiencia:
-   *
-   *  · Desktop (pointer fino, >1024px) → scroll-driven con GSAP scrub
-   *  · Mobile / Tablet                 → autoplay + timeline temporizado
+   * El vídeo se reproduce automáticamente en bucle.
+   * Los paneles de texto se animan con un timeline GSAP
+   * temporizado en segundos reales, sincronizado con el vídeo.
+   * Sin pin, sin scrubbing — el usuario scrollea cuando quiera.
    */
-  const isMobile = window.matchMedia(
-    '(max-width: 1024px), (pointer: coarse)'
-  ).matches;
-
-  /* ── COMÚN: construcción del timeline de paneles ────
-   *
-   * En desktop recibe tiempos normalizados [0-1] y se controla
-   * con tl.progress(). En mobile recibe segundos reales y corre solo.
-   */
-  function buildPanelTimeline(useSeconds, dur) {
-    /* pos(s) → posición en el timeline */
-    const pos = useSeconds ? (s) => s : (s) => s / dur;
-
-    const tl = gsap.timeline({ paused: !useSeconds });
-
-    tl.fromTo('#panel-1',
-      { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.45 : 0.45 / dur },
-      pos(0)
-    ).to('#panel-1',
-      { opacity: 0, y: -46, ease: 'power2.in', duration: useSeconds ? 0.55 : 0.55 / dur },
-      pos(1.0)
-    ).fromTo('#panel-2',
-      { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.45 : 0.45 / dur },
-      pos(5.3)
-    ).to('#panel-2',
-      { opacity: 0, y: -46, ease: 'power2.in', duration: useSeconds ? 0.55 : 0.55 / dur },
-      pos(7.0)
-    ).fromTo('#panel-3',
-      { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.45 : 0.45 / dur },
-      pos(11.3)
-    ).to('#panel-3',
-      { opacity: 0, y: -46, ease: 'power2.in', duration: useSeconds ? 0.55 : 0.55 / dur },
-      pos(13.0)
-    ).fromTo('#panel-4',
-      { opacity: 0, y: 28 },
-      { opacity: 1, y: 0, ease: 'power2.out', duration: useSeconds ? 0.75 : 0.75 / dur },
-      pos(17.3)
-    );
-
-    if (!useSeconds) tl.set({}, {}, 1); /* ancla el final en 1.0 para desktop */
-
-    return tl;
-  }
-
-  /* ══════════════════════════════════════════════════
-     MOBILE — autoplay + timeline temporizado en segundos reales
-     Sin pin, sin scrubbing. El vídeo corre a 1× velocidad
-     y el texto se sincroniza mediante timestamps reales.
-  ══════════════════════════════════════════════════ */
-  function initAutoplay() {
+  function init() {
     video.loop = true;
     video.play().catch(() => {});
 
-    /* Timeline corre automáticamente en tiempo real */
-    buildPanelTimeline(true, null);
+    /* Timeline de paneles en tiempo real (segundos del vídeo) */
+    gsap.timeline()
+      .fromTo('#panel-1', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.45 }, 0)
+      .to(   '#panel-1', { opacity: 0, y: -46,   ease: 'power2.in',  duration: 0.55 }, 1.0)
+      .fromTo('#panel-2', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.45 }, 5.3)
+      .to(   '#panel-2', { opacity: 0, y: -46,   ease: 'power2.in',  duration: 0.55 }, 7.0)
+      .fromTo('#panel-3', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.45 }, 11.3)
+      .to(   '#panel-3', { opacity: 0, y: -46,   ease: 'power2.in',  duration: 0.55 }, 13.0)
+      .fromTo('#panel-4', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.75 }, 17.3);
 
-    /* Contador + barra de progreso sincronizados con el vídeo */
+    /* Barra de progreso y contador sincronizados con el vídeo */
     video.addEventListener('timeupdate', function () {
       const t   = video.currentTime;
       const dur = video.duration || 19;
@@ -1363,64 +1290,10 @@
     });
   }
 
-  /* ══════════════════════════════════════════════════
-     DESKTOP — scroll-driven con GSAP ScrollTrigger + scrub
-  ══════════════════════════════════════════════════ */
-  function initScrollytelling() {
-    const dur = video.duration;
-    const tl  = buildPanelTimeline(false, dur);
-
-    ScrollTrigger.create({
-      trigger     : '#pin-stage',
-      pin         : true,
-      start       : 'top top',
-      end         : `+=${window.innerHeight * SCROLL_VH}`,
-      scrub       : 0.7,
-      anticipatePin: 1,
-
-      onUpdate(self) {
-        const progress = self.progress;
-
-        const target = progress * dur;
-        if (Math.abs(video.currentTime - target) > 0.04) {
-          video.currentTime = target;
-        }
-
-        tl.progress(progress);
-
-        progressEl.style.width = `${progress * 100}%`;
-        progressEl.setAttribute('aria-valuenow', Math.round(progress * 100));
-
-        const t = progress * dur;
-        let idx = 0;
-        if      (t >= 17.3) idx = 3;
-        else if (t >= 11.3) idx = 2;
-        else if (t >=  5.3) idx = 1;
-        const label = String(idx + 1).padStart(2, '0');
-        if (counterEl.textContent !== label) counterEl.textContent = label;
-
-        if (progress > 0.015) scrollHint.classList.add('hidden');
-        else scrollHint.classList.remove('hidden');
-      }
-    });
-
-    window.addEventListener('resize', () => ScrollTrigger.refresh(), { passive: true });
-  }
-
-  /* ── Punto de entrada ──────────────────────────── */
-  function onReady() {
-    hideLoader();
-    if (isMobile) {
-      initAutoplay();
-    } else {
-      initScrollytelling();
-    }
-  }
-
   if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
-    onReady();
+    hideLoader(); init();
   } else {
-    video.addEventListener('loadedmetadata', onReady, { once: true });
+    video.addEventListener('loadedmetadata', () => { hideLoader(); init(); }, { once: true });
   }
 
 })();
