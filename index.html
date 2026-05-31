@@ -1264,20 +1264,27 @@
     video.loop = true;
     video.play().catch(() => {});
 
-    /* Timeline de paneles en tiempo real (segundos del vídeo) */
-    gsap.timeline()
+    /* Timeline de paneles — guardado en variable para poder reiniciarlo */
+    const tl = gsap.timeline()
       .fromTo('#panel-1', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.45 }, 0)
       .to(   '#panel-1', { opacity: 0, y: -46,   ease: 'power2.in',  duration: 0.55 }, 1.0)
       .fromTo('#panel-2', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.45 }, 5.3)
       .to(   '#panel-2', { opacity: 0, y: -46,   ease: 'power2.in',  duration: 0.55 }, 7.0)
       .fromTo('#panel-3', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.45 }, 11.3)
       .to(   '#panel-3', { opacity: 0, y: -46,   ease: 'power2.in',  duration: 0.55 }, 13.0)
-      .fromTo('#panel-4', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.75 }, 17.3);
+      .fromTo('#panel-4', { opacity: 0, y: 28 }, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.75 }, 17.3)
+      .to(   '#panel-4', { opacity: 0, y: -46,   ease: 'power2.in',  duration: 0.55 }, 18.3);
 
-    /* Barra de progreso y contador sincronizados con el vídeo */
+    /* Barra de progreso, contador y detección de loop */
+    let lastTime = 0;
     video.addEventListener('timeupdate', function () {
       const t   = video.currentTime;
       const dur = video.duration || 19;
+
+      /* Cuando el vídeo hace loop (currentTime salta hacia atrás),
+         reiniciamos el timeline para que el ciclo empiece limpio */
+      if (lastTime > 15 && t < 2) tl.restart();
+      lastTime = t;
 
       progressEl.style.width = `${Math.min((t / dur) * 100, 100)}%`;
 
