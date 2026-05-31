@@ -534,7 +534,7 @@
       color: rgba(255,255,255,.28);
       max-width: 24ch;
       line-height: 1.65;
-      align-self: flex-end;
+      align-self: flex-end; /* solo tiene efecto en desktop donde no hay wrap */
     }
 
     /*
@@ -552,10 +552,43 @@
       margin: 0 auto;
     }
 
-    @media (max-width: 600px) {
+    /* ── Responsive vídeos ──────────────────────────── */
+
+    /* Tablet portrait y móvil: 1 columna */
+    @media (max-width: 768px) {
       .videos__grid {
         grid-template-columns: 1fr;
         max-width: 100%;
+      }
+      /* Cap de altura: evita vídeos desproporcionados en pantallas cortas */
+      .video-wrapper {
+        max-height: 75vh;
+      }
+      /* Ocultar nota en pantallas pequeñas para liberar espacio */
+      .videos__note {
+        display: none;
+      }
+    }
+
+    /* Landscape phones (ancho > 600px pero altura ≤ 500px):
+       3 columnas pequeñas con cap de altura, más manejable */
+    @media (orientation: landscape) and (max-height: 500px) {
+      .videos__grid {
+        grid-template-columns: repeat(3, 1fr);
+        max-width: 100%;
+      }
+      .video-wrapper {
+        max-height: 60vh;
+      }
+      /* Hero en landscape phone: reducir tamaño y posición del texto */
+      .panel {
+        bottom: clamp(3rem, 8vh, 6rem);
+      }
+      .panel__title-main {
+        font-size: clamp(2.2rem, 7vw, 5rem);
+      }
+      .panel__title-pre {
+        font-size: clamp(1rem, 2.5vw, 2rem);
       }
     }
 
@@ -664,7 +697,13 @@
       color: rgba(255,255,255,.28);
       max-width: 30ch;
       line-height: 1.65;
-      align-self: flex-end;
+      align-self: flex-end; /* solo tiene efecto en desktop donde no hay wrap */
+    }
+
+    @media (max-width: 768px) {
+      .transformations__note {
+        display: none;
+      }
     }
 
     /* Grid de 3 sliders — sin separación entre tarjetas */
