@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DYS Solutions — Diseño Web, Producción de Vídeo, Edición Avanzada y Reconstrucción IA." />
+  <title>DYS Solutions</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Reset ───────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ════════════════════════════════════════════════
+       SCROLLYTELLING
+    ════════════════════════════════════════════════ */
+
+    #pin-stage {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+    }
+
+    /* Vídeo de fondo */
+    #hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    /* Gradiente cinemático — legibilidad del texto */
+    #pin-stage::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        160deg,
+        rgba(0,0,0,.65) 0%,
+        transparent 35%,
+        transparent 48%,
+        rgba(0,0,0,.92) 100%
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Fallback color si el vídeo no carga */
+    #video-fallback {
+      position: absolute;
+      inset: 0;
+      background: #080808;
+      z-index: 0;
+    }
+
+    /* ── Loading overlay ─────────────────────────────── */
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity .55s ease;
+    }
+    #loading-overlay.ready { opacity: 0; pointer-events: none; }
+    .loader-ring {
+      width: 34px;
+      height: 34px;
+      border: 1.5px solid rgba(255,255,255,.1);
+      border-top-color: rgba(255,255,255,.7);
+      border-radius: 50%;
+      animation: spin .75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Marca (top-left) ────────────────────────────── */
+    #brand {
+      position: absolute;
+      top: clamp(1.25rem, 3.5vh, 2rem);
+      left: clamp(1.25rem, 4vw, 3rem);
+      z-index: 10;
+    }
+    #brand .wordmark {
+      display: block;
+      font-size: clamp(.78rem, 1.6vw, .95rem);
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    #brand .tagline {
+      display: block;
+      font-size: clamp(.52rem, .9vw, .62rem);
+      font-weight: 400;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.32);
+      margin-top: .22em;
+    }
+
+    /* ── Contador (top-right) ────────────────────────── */
+    #counter {
+      position: absolute;
+      top: clamp(1.25rem, 3.5vh, 2rem);
+      right: clamp(1.25rem, 4vw, 3rem);
+      z-index: 10;
+      font-size: clamp(.58rem, 1vw, .68rem);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+      font-variant-numeric: tabular-nums;
+    }
+    #counter-current {
+      color: rgba(255,255,255,.8);
+    }
+
+    /* ════════════════════════════════════════════════
+       PANELES DE SERVICIO — tipografía editorial
+    ════════════════════════════════════════════════ */
+
+    .panel {
+      position: absolute;
+      bottom: clamp(7rem, 20vh, 14rem);
+      left: clamp(1.25rem, 4vw, 3rem);
+      right: clamp(1.25rem, 4vw, 3rem);
+      z-index: 5;
+      opacity: 0;
+      will-change: transform, opacity;
+      transform: translateZ(0);
+    }
+
+    /*
+     * Número fantasma — textura tipográfica de fondo.
+     * Más opaco que antes para que sea perceptible sobre el vídeo.
+     */
+    .panel::before {
+      content: attr(data-num);
+      position: absolute;
+      bottom: -.08em;
+      right: -.02em;
+      font-size: clamp(10rem, 32vw, 26rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.06em;
+      color: rgba(255,255,255,.06);
+      pointer-events: none;
+      -webkit-user-select: none;
+      user-select: none;
+      z-index: -1;
+    }
+
+    /* ── Indicador de servicio (reemplaza el badge) ──
+     * Número · línea fina · categoría en una sola fila.
+     * Aspecto editorial, no de tarjeta UI.
+     */
+    .panel__indicator {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin-bottom: clamp(.7rem, 1.8vh, 1.1rem);
+    }
+    .panel__indicator-num {
+      font-size: clamp(.58rem, .95vw, .7rem);
+      font-weight: 700;
+      letter-spacing: .2em;
+      color: rgba(255,255,255,.42);
+      font-variant-numeric: tabular-nums;
+    }
+    .panel__indicator-dash {
+      width: clamp(1.2rem, 3.5vw, 2.5rem);
+      height: 1px;
+      background: rgba(255,255,255,.18);
+      flex-shrink: 0;
+    }
+    .panel__indicator-label {
+      font-size: clamp(.52rem, .85vw, .62rem);
+      font-weight: 500;
+      letter-spacing: .26em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.26);
+    }
+
+    /* ── Titular — escala cinemática ──
+     *
+     * Dos registros:
+     *   pre  → peso 300, tamaño grande pero controlado (contexto)
+     *   main → peso 900, tamaño masivo + itálica (impacto)
+     *
+     * text-shadow para legibilidad sobre cualquier fotograma del vídeo.
+     */
+    .panel__title {
+      margin-bottom: clamp(.6rem, 1.5vh, 1rem);
+    }
+    .panel__title-pre {
+      display: block;
+      font-size: clamp(1.4rem, 3.8vw, 3.5rem);
+      font-weight: 300;
+      line-height: 1;
+      letter-spacing: .02em;
+      color: rgba(255,255,255,.38);
+      text-shadow: 0 2px 28px rgba(0,0,0,.6);
+    }
+    .panel__title-main {
+      display: block;
+      font-size: clamp(3.8rem, 11vw, 10rem);
+      font-weight: 900;
+      line-height: .88;
+      letter-spacing: -.04em;
+      color: #fff;
+      text-shadow: 0 4px 48px rgba(0,0,0,.45);
+    }
+    .panel__title-main em {
+      font-style: italic;
+    }
+
+    /* Línea divisoria fina entre título y descripción */
+    .panel__divider {
+      display: block;
+      width: clamp(4rem, 14vw, 10rem);
+      height: 1px;
+      background: rgba(255,255,255,.14);
+      margin: clamp(.55rem, 1.3vh, .9rem) 0;
+    }
+
+    /* Descripción */
+    .panel__desc {
+      max-width: 50ch;
+    }
+    .panel__desc p {
+      font-size: clamp(.78rem, 1.35vw, .92rem);
+      font-weight: 400;
+      line-height: 1.72;
+      color: rgba(255,255,255,.44);
+      text-shadow: 0 1px 12px rgba(0,0,0,.55);
+    }
+
+    /* ── Barra de progreso ───────────────────────────── */
+    #progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: 0%;
+      background: rgba(255,255,255,.6);
+      z-index: 20;
+      transform-origin: left center;
+      will-change: width;
+    }
+
+    /* ── Indicador de scroll ─────────────────────────── */
+    #scroll-hint {
+      position: absolute;
+      bottom: clamp(.9rem, 2.2vh, 1.4rem);
+      right: clamp(1.25rem, 4vw, 3rem);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .45rem;
+      transition: opacity .5s ease;
+    }
+    #scroll-hint.hidden { opacity: 0; pointer-events: none; }
+    #scroll-hint span {
+      font-size: .5rem;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+    .scroll-chevron {
+      width: 16px;
+      height: 16px;
+      border-right: 1.5px solid rgba(255,255,255,.3);
+      border-bottom: 1.5px solid rgba(255,255,255,.3);
+      transform: rotate(45deg);
+      animation: bounce 1.7s ease infinite;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: rotate(45deg) translate(0, 0); }
+      50%       { transform: rotate(45deg) translate(3px, 3px); }
+    }
+
+    /* ════════════════════════════════════════════════
+       SECCIÓN PORTFOLIO
+    ════════════════════════════════════════════════ */
+
+    #portfolio {
+      background: #050505;
+      padding: clamp(4rem, 10vh, 8rem) clamp(1.25rem, 4vw, 3rem);
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .portfolio__header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: clamp(2.5rem, 6vh, 4.5rem);
+      padding-bottom: clamp(1.5rem, 3vh, 2.5rem);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+
+    .portfolio__overline {
+      font-size: clamp(.55rem, .9vw, .65rem);
+      font-weight: 600;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+    .portfolio__overline--count {
+      align-self: flex-end;
+      padding-bottom: .15rem;
+    }
+
+    .portfolio__headline {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -.025em;
+      line-height: 1;
+      color: #fff;
+    }
+    .portfolio__headline em {
+      font-style: italic;
+      color: rgba(255,255,255,.45);
+    }
+
+    /* Grid de 3 tarjetas */
+    .portfolio__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .portfolio__card {
+      background: #050505;
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: background .25s ease;
+    }
+    .portfolio__card:hover { background: #0d0d0d; }
+
+    .portfolio__card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Chip de categoría */
+    .portfolio__tag {
+      font-size: clamp(.5rem, .85vw, .6rem);
+      font-weight: 600;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: .25rem .6rem;
+      border-radius: 2px;
+    }
+
+    .portfolio__card-num {
+      font-size: clamp(.55rem, .9vw, .65rem);
+      font-weight: 700;
+      letter-spacing: .15em;
+      color: rgba(255,255,255,.15);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .portfolio__card h3 {
+      font-size: clamp(1.3rem, 3vw, 2rem);
+      font-weight: 900;
+      letter-spacing: -.02em;
+      line-height: 1;
+      color: #fff;
+    }
+
+    .portfolio__card p {
+      font-size: clamp(.8rem, 1.3vw, .9rem);
+      font-weight: 400;
+      line-height: 1.68;
+      color: rgba(255,255,255,.38);
+      flex: 1;
+    }
+
+    .portfolio__link {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: clamp(.7rem, 1.1vw, .8rem);
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: rgba(255,255,255,.5);
+      text-decoration: none;
+      border-top: 1px solid rgba(255,255,255,.07);
+      padding-top: 1rem;
+      margin-top: auto;
+      transition: color .2s ease;
+    }
+    .portfolio__link:hover { color: #fff; }
+    .portfolio__link-arrow {
+      font-size: 1.1em;
+      transition: transform .2s ease;
+    }
+    .portfolio__link:hover .portfolio__link-arrow { transform: translate(2px, -2px); }
+
+    /* ════════════════════════════════════════════════
+       SECCIÓN CONTACTO / CTA
+    ════════════════════════════════════════════════ */
+
+    #contact {
+      min-height: 70vh;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: clamp(4rem, 10vh, 8rem) clamp(1.25rem, 4vw, 3rem);
+      border-top: 1px solid rgba(255,255,255,.06);
+      gap: clamp(1.5rem, 4vh, 2.5rem);
+    }
+
+    #contact .contact__label {
+      font-size: clamp(.55rem, .9vw, .65rem);
+      font-weight: 600;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+
+    #contact h2 {
+      font-size: clamp(2.2rem, 6vw, 5rem);
+      font-weight: 900;
+      letter-spacing: -.03em;
+      line-height: .95;
+      color: #fff;
+      max-width: 16ch;
+    }
+    #contact h2 em {
+      font-style: italic;
+      color: rgba(255,255,255,.4);
+    }
+
+    #contact p {
+      font-size: clamp(.85rem, 1.5vw, 1rem);
+      color: rgba(255,255,255,.35);
+      max-width: 44ch;
+      line-height: 1.7;
+    }
+
+    .contact__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      background: #fff;
+      color: #000;
+      font-size: clamp(.8rem, 1.3vw, .9rem);
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: .9rem 2rem;
+      border-radius: 2px;
+      margin-top: .5rem;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .contact__cta:hover { opacity: .88; transform: translateY(-1px); }
+
+    /* ════════════════════════════════════════════════
+       VÍDEOS — Reels de producción
+    ════════════════════════════════════════════════ */
+
+    #videos {
+      background: #050505;
+      padding: clamp(4rem, 10vh, 8rem) 0;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .videos__header {
+      padding: 0 clamp(1.25rem, 4vw, 3rem);
+      margin-bottom: clamp(2.5rem, 6vh, 4rem);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .videos__overline {
+      display: block;
+      font-size: clamp(.55rem, .9vw, .65rem);
+      font-weight: 600;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+      margin-bottom: .6rem;
+    }
+
+    .videos__headline {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -.025em;
+      line-height: 1;
+      color: #fff;
+    }
+    .videos__headline em {
+      font-style: italic;
+      color: rgba(255,255,255,.4);
+    }
+
+    .videos__note {
+      font-size: clamp(.75rem, 1.2vw, .85rem);
+      color: rgba(255,255,255,.28);
+      max-width: 24ch;
+      line-height: 1.65;
+      align-self: flex-end;
+    }
+
+    /*
+     * Grid de 3 vídeos verticales.
+     * max-width: 960px centra el conjunto y limita la altura:
+     * en 1080p cada columna = 320px → altura 9:16 = 568px ≈ 53vh. Cómodo.
+     * En móvil cae a 1 columna ocupando el ancho completo.
+     */
+    .videos__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,.06);
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 600px) {
+      .videos__grid {
+        grid-template-columns: 1fr;
+        max-width: 100%;
+      }
+    }
+
+    .video-card {
+      background: #050505;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /*
+     * padding-bottom: 177.78% = (16/9) × 100%.
+     * Técnica clásica para mantener ratio 9:16 en iframes
+     * sin que el contenedor colapso a altura 0.
+     * height: 0 + padding-bottom crean el espacio proporcional al ancho.
+     */
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      padding-bottom: 177.78%;
+      height: 0;
+      overflow: hidden;
+      background: #0a0a0a;
+    }
+
+    .video-wrapper iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .video-caption {
+      padding: .9rem clamp(1rem, 2.5vw, 1.4rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .video-caption__title {
+      font-size: clamp(.75rem, 1.2vw, .85rem);
+      font-weight: 600;
+      color: rgba(255,255,255,.65);
+      letter-spacing: -.01em;
+    }
+
+    .video-caption__tag {
+      flex-shrink: 0;
+      font-size: .5rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.25);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: .22rem .55rem;
+      border-radius: 2px;
+    }
+
+    /* ════════════════════════════════════════════════
+       TRANSFORMACIONES ANTES / DESPUÉS
+    ════════════════════════════════════════════════ */
+
+    #transformations {
+      background: #000;
+      padding: clamp(4rem, 10vh, 8rem) 0;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .transformations__header {
+      padding: 0 clamp(1.25rem, 4vw, 3rem);
+      margin-bottom: clamp(2.5rem, 6vh, 4rem);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .transformations__overline {
+      display: block;
+      font-size: clamp(.55rem, .9vw, .65rem);
+      font-weight: 600;
+      letter-spacing: .28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+      margin-bottom: .6rem;
+    }
+
+    .transformations__headline {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      font-weight: 900;
+      letter-spacing: -.025em;
+      line-height: 1;
+      color: #fff;
+    }
+    .transformations__headline em {
+      font-style: italic;
+      color: rgba(255,255,255,.4);
+    }
+
+    .transformations__note {
+      font-size: clamp(.75rem, 1.2vw, .85rem);
+      color: rgba(255,255,255,.28);
+      max-width: 30ch;
+      line-height: 1.65;
+      align-self: flex-end;
+    }
+
+    /* Grid de 3 sliders — sin separación entre tarjetas */
+    .transformations__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+      gap: 1px;
+      background: rgba(255,255,255,.06);
+    }
+
+    /* ── Before/After Slider ─────────────────────────── */
+    .ba-card {
+      background: #000;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ba-slider {
+      position: relative;
+      --split: 50%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      cursor: col-resize;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: pan-y;
+    }
+    /* foco visible para accesibilidad */
+    .ba-slider:focus-visible {
+      outline: 2px solid rgba(255,255,255,.5);
+      outline-offset: -2px;
+    }
+
+    .ba-after,
+    .ba-before {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      pointer-events: none;
+    }
+
+    /* La imagen "Antes" flota encima, recortada por la izquierda */
+    .ba-before {
+      z-index: 2;
+      clip-path: inset(0 calc(100% - var(--split)) 0 0);
+      will-change: clip-path;
+    }
+
+    /* Línea + círculo draggable */
+    .ba-handle {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: var(--split);
+      transform: translateX(-50%);
+      z-index: 10;
+      width: 2px;
+      background: rgba(255,255,255,.9);
+      cursor: col-resize;
+      will-change: left;
+    }
+    /* Círculo */
+    .ba-handle::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 2px 14px rgba(0,0,0,.55);
+    }
+    /* Flechas ← → dentro del círculo */
+    .ba-handle::after {
+      content: '← →';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: .58rem;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: #000;
+      white-space: nowrap;
+    }
+
+    /* Badges ANTES / DESPUÉS */
+    .ba-label {
+      position: absolute;
+      top: .85rem;
+      z-index: 5;
+      font-size: .5rem;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      padding: .26rem .6rem;
+      border-radius: 2px;
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      pointer-events: none;
+    }
+    .ba-label--before {
+      left: .85rem;
+      background: rgba(0,0,0,.6);
+      color: rgba(255,255,255,.7);
+    }
+    .ba-label--after {
+      right: .85rem;
+      background: rgba(255,255,255,.1);
+      color: rgba(255,255,255,.85);
+      border: 1px solid rgba(255,255,255,.14);
+    }
+
+    /* Caption debajo de cada slider */
+    .ba-caption {
+      padding: .9rem clamp(1rem, 2.5vw, 1.4rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .75rem;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .ba-caption__title {
+      font-size: clamp(.75rem, 1.2vw, .85rem);
+      font-weight: 600;
+      color: rgba(255,255,255,.65);
+      letter-spacing: -.01em;
+    }
+    .ba-caption__tag {
+      flex-shrink: 0;
+      font-size: .5rem;
+      font-weight: 600;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.25);
+      border: 1px solid rgba(255,255,255,.1);
+      padding: .22rem .55rem;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     SCROLLYTELLING
+════════════════════════════════════════════════ -->
+<div id="pin-stage" role="region" aria-label="Servicios de DYS Solutions">
+
+  <div id="video-fallback" aria-hidden="true"></div>
+
+  <div id="loading-overlay" role="status" aria-label="Cargando">
+    <div class="loader-ring"></div>
+  </div>
+
+  <!--
+    ATRIBUTOS CRÍTICOS MÓVIL:
+    · playsinline + webkit-playsinline → evita reproductor nativo iOS/Android
+    · muted → obligatorio para autoplay en navegadores móviles
+    · preload="auto" → precarga del archivo
+    · SIN loop → incompatible con scrubbing por scroll (rompería la sincronización)
+    · SIN controls → la reproducción la gestiona GSAP vía scroll
+  -->
+  <video
+    id="hero-video"
+    src="assets/hero-movie1.mp4?v=2"
+    playsinline
+    webkit-playsinline
+    muted
+    preload="auto"
+    aria-hidden="true"
+  ></video>
+
+  <!-- Marca -->
+  <div id="brand">
+    <span class="wordmark">DYS Solutions</span>
+    <span class="tagline">Agencia Digital</span>
+  </div>
+
+  <!-- Contador -->
+  <div id="counter" aria-live="polite" aria-atomic="true">
+    <span id="counter-current">01</span>&thinsp;/&thinsp;04
+  </div>
+
+  <!--
+    PANELES — estructura renovada:
+    · Badge con número + categoría descriptiva (borde fino)
+    · Titular en dos registros: fino/contexto + negro-itálica/impacto
+    · Descripción con borde izquierdo sutil
+    · data-num alimenta el número fantasma de fondo vía CSS attr()
+  -->
+
+  <!-- Panel 1: Diseño Web (0 s → 1 s) -->
+  <article id="panel-1" class="panel" data-num="01" aria-label="Servicio 01: Diseño Web">
+    <div class="panel__indicator">
+      <span class="panel__indicator-num">01</span>
+      <span class="panel__indicator-dash" aria-hidden="true"></span>
+      <span class="panel__indicator-label">Presencia Digital</span>
+    </div>
+    <div class="panel__title">
+      <span class="panel__title-pre">Diseño</span>
+      <span class="panel__title-main"><em>Web</em></span>
+    </div>
+    <span class="panel__divider" aria-hidden="true"></span>
+    <div class="panel__desc">
+      <p>Interfaces digitales de alto rendimiento orientadas a la conversión y con una experiencia estética premium.</p>
+    </div>
+  </article>
+
+  <!-- Panel 2: Producción de Vídeo (6 s → 7 s) -->
+  <article id="panel-2" class="panel" data-num="02" aria-label="Servicio 02: Producción de Vídeo">
+    <div class="panel__indicator">
+      <span class="panel__indicator-num">02</span>
+      <span class="panel__indicator-dash" aria-hidden="true"></span>
+      <span class="panel__indicator-label">Contenido Audiovisual</span>
+    </div>
+    <div class="panel__title">
+      <span class="panel__title-pre">Producción de</span>
+      <span class="panel__title-main"><em>Vídeo</em></span>
+    </div>
+    <span class="panel__divider" aria-hidden="true"></span>
+    <div class="panel__desc">
+      <p>Narrativas dinámicas y contenido audiovisual de alta fidelidad optimizado para enganchar a tu audiencia.</p>
+    </div>
+  </article>
+
+  <!-- Panel 3: Edición Avanzada (12 s → 13 s) -->
+  <article id="panel-3" class="panel" data-num="03" aria-label="Servicio 03: Edición Avanzada">
+    <div class="panel__indicator">
+      <span class="panel__indicator-num">03</span>
+      <span class="panel__indicator-dash" aria-hidden="true"></span>
+      <span class="panel__indicator-label">Postproducción</span>
+    </div>
+    <div class="panel__title">
+      <span class="panel__title-pre">Edición</span>
+      <span class="panel__title-main"><em>Avanzada</em></span>
+    </div>
+    <span class="panel__divider" aria-hidden="true"></span>
+    <div class="panel__desc">
+      <p>Montaje rítmico, corrección de color cinemática y tratamiento de sonido profesional.</p>
+    </div>
+  </article>
+
+  <!-- Panel 4: Reconstrucción IA (18 s → 19 s, permanece) -->
+  <article id="panel-4" class="panel" data-num="04" aria-label="Servicio 04: Reconstrucción IA">
+    <div class="panel__indicator">
+      <span class="panel__indicator-num">04</span>
+      <span class="panel__indicator-dash" aria-hidden="true"></span>
+      <span class="panel__indicator-label">Inteligencia Artificial</span>
+    </div>
+    <div class="panel__title">
+      <span class="panel__title-pre">Reconstrucción</span>
+      <span class="panel__title-main"><em>IA</em></span>
+    </div>
+    <span class="panel__divider" aria-hidden="true"></span>
+    <div class="panel__desc">
+      <p>Postproducción del futuro. Escalado inteligente, restauración de archivos y generación de assets mediante IA avanzada.</p>
+    </div>
+  </article>
+
+  <div id="progress-bar"
+       role="progressbar"
+       aria-valuenow="0"
+       aria-valuemin="0"
+       aria-valuemax="100"
+       aria-label="Progreso de la experiencia"></div>
+
+  <div id="scroll-hint" aria-hidden="true">
+    <span>Scroll</span>
+    <div class="scroll-chevron"></div>
+  </div>
+
+</div><!-- /pin-stage -->
+
+
+<!-- ════════════════════════════════════════════════
+     PORTFOLIO — proyectos entregados
+════════════════════════════════════════════════ -->
+<section id="portfolio" aria-label="Portfolio de proyectos">
+  <div class="portfolio__header">
+    <div>
+      <span class="portfolio__overline">Trabajos Recientes</span>
+      <h2 class="portfolio__headline">Proyectos que ya <em>venden</em></h2>
+    </div>
+    <span class="portfolio__overline portfolio__overline--count">3 Proyectos</span>
+  </div>
+
+  <div class="portfolio__grid">
+
+    <!-- ProCar Sales -->
+    <article class="portfolio__card">
+      <div class="portfolio__card-top">
+        <span class="portfolio__tag">Automoción</span>
+        <span class="portfolio__card-num">01</span>
+      </div>
+      <h3>ProCar Sales</h3>
+      <p>Plataforma de compraventa de vehículos de segunda mano con catálogo dinámico, filtros avanzados y contacto directo por WhatsApp.</p>
+      <a href="https://procar-sales.com/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
+        procar-sales.com
+        <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
+      </a>
+    </article>
+
+    <!-- Madu Box -->
+    <article class="portfolio__card">
+      <div class="portfolio__card-top">
+        <span class="portfolio__tag">Fitness &amp; Deporte</span>
+        <span class="portfolio__card-num">02</span>
+      </div>
+      <h3>Madu Box</h3>
+      <p>Web de alto impacto para una sala de boxeo real. Diseño bold y directo pensado para convertir visitas en inscripciones.</p>
+      <a href="https://madu-box.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
+        madu-box.vercel.app
+        <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
+      </a>
+    </article>
+
+    <!-- Jardines RA -->
+    <article class="portfolio__card">
+      <div class="portfolio__card-top">
+        <span class="portfolio__tag">Servicios Locales</span>
+        <span class="portfolio__card-num">03</span>
+      </div>
+      <h3>Jardines Raúl Aguiló</h3>
+      <p>Presencia digital premium para empresa de jardinería en Mallorca. Fotografía mediterránea, catálogo de servicios y contacto directo.</p>
+      <a href="https://jardines-servicios-r-a.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
+        jardines-servicios-r-a.vercel.app
+        <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
+      </a>
+    </article>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     VÍDEOS — Reels de producción
+════════════════════════════════════════════════ -->
+<section id="videos" aria-label="Reels de producción de vídeo">
+
+  <div class="videos__header">
+    <div>
+      <span class="videos__overline">Producción de Vídeo</span>
+      <h2 class="videos__headline">El trabajo <em>habla</em></h2>
+    </div>
+    <p class="videos__note">Reels de producción propia. Activa el sonido.</p>
+  </div>
+
+  <div class="videos__grid">
+
+    <!-- Gym Reel -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe
+          src="https://player.vimeo.com/video/1197128377?dnt=1&title=0&byline=0&portrait=0&color=ffffff"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+          title="Gym Reel — DYS Solutions"
+        ></iframe>
+      </div>
+      <div class="video-caption">
+        <span class="video-caption__title">Gym Reel</span>
+        <span class="video-caption__tag">Fitness</span>
+      </div>
+    </div>
+
+    <!-- Videoclip Reel -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe
+          src="https://player.vimeo.com/video/1197128994?dnt=1&title=0&byline=0&portrait=0&color=ffffff"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+          title="Videoclip Reel — DYS Solutions"
+        ></iframe>
+      </div>
+      <div class="video-caption">
+        <span class="video-caption__title">Videoclip Reel</span>
+        <span class="video-caption__tag">Música</span>
+      </div>
+    </div>
+
+    <!-- Documental Reel — sustituir PENDIENTE por el ID correcto de Vimeo -->
+    <div class="video-card">
+      <div class="video-wrapper">
+        <iframe
+          src="https://player.vimeo.com/video/1197129098?dnt=1&title=0&byline=0&portrait=0&color=ffffff"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowfullscreen
+          title="Documental Reel — DYS Solutions"
+        ></iframe>
+      </div>
+      <div class="video-caption">
+        <span class="video-caption__title">Documental Reel</span>
+        <span class="video-caption__tag">Documental</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     TRANSFORMACIONES ANTES / DESPUÉS
+════════════════════════════════════════════════ -->
+<section id="transformations" aria-label="Galería de transformaciones antes y después">
+
+  <div class="transformations__header">
+    <div>
+      <span class="transformations__overline">Edición Avanzada · Reconstrucción IA</span>
+      <h2 class="transformations__headline">Resultados <em>reales</em></h2>
+    </div>
+    <p class="transformations__note">Arrastra la línea para comparar la fotografía original con el resultado tras edición y reconstrucción IA.</p>
+  </div>
+
+  <div class="transformations__grid">
+
+    <!-- Slider 1: Acceso con palmeras -->
+    <div class="ba-card">
+      <div
+        class="ba-slider"
+        tabindex="0"
+        role="img"
+        aria-label="Antes y después: Acceso con palmeras, Mallorca"
+      >
+        <img
+          class="ba-after"
+          src="assets/palmeras.png"
+          alt="Después: Acceso con palmeras, colores cinemáticos y composición ampliada con IA"
+          loading="lazy"
+          decoding="async"
+        />
+        <img
+          class="ba-before"
+          src="assets/palmeras.jpeg"
+          alt="Antes: Fotografía original vertical tomada desde móvil"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="ba-handle" aria-hidden="true"></div>
+        <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
+        <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+      </div>
+      <div class="ba-caption">
+        <span class="ba-caption__title">Acceso con palmeras · Mallorca</span>
+        <span class="ba-caption__tag">Reconstrucción IA</span>
+      </div>
+    </div>
+
+    <!-- Slider 2: Jardín privado con vistas al mar -->
+    <div class="ba-card">
+      <div
+        class="ba-slider"
+        tabindex="0"
+        role="img"
+        aria-label="Antes y después: Jardín privado con vistas al mar"
+      >
+        <img
+          class="ba-after"
+          src="assets/palmeras5.png"
+          alt="Después: Jardín privado con palmera y vistas al Mediterráneo, editado con IA"
+          loading="lazy"
+          decoding="async"
+        />
+        <img
+          class="ba-before"
+          src="assets/palmeras5.jpeg"
+          alt="Antes: Fotografía original vertical tomada desde móvil"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="ba-handle" aria-hidden="true"></div>
+        <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
+        <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+      </div>
+      <div class="ba-caption">
+        <span class="ba-caption__title">Jardín privado · Vistas al mar</span>
+        <span class="ba-caption__tag">Edición Avanzada</span>
+      </div>
+    </div>
+
+    <!-- Slider 3: Piscina comunitaria -->
+    <div class="ba-card">
+      <div
+        class="ba-slider"
+        tabindex="0"
+        role="img"
+        aria-label="Antes y después: Piscina comunitaria, Mallorca"
+      >
+        <img
+          class="ba-after"
+          src="assets/piscina-jardin2.png"
+          alt="Después: Piscina comunitaria con colores vivos y composición mejorada"
+          loading="lazy"
+          decoding="async"
+        />
+        <img
+          class="ba-before"
+          src="assets/piscina-jardin2.jpeg"
+          alt="Antes: Fotografía original tomada desde móvil"
+          loading="lazy"
+          decoding="async"
+        />
+        <div class="ba-handle" aria-hidden="true"></div>
+        <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
+        <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+      </div>
+      <div class="ba-caption">
+        <span class="ba-caption__title">Piscina comunitaria · Mallorca</span>
+        <span class="ba-caption__tag">Reconstrucción IA</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     CONTACTO / CTA
+════════════════════════════════════════════════ -->
+<section id="contact" aria-label="Contacto">
+  <span class="contact__label">¿Empezamos?</span>
+  <h2>Hablemos de tu <em>proyecto</em></h2>
+  <p>Cuéntanos qué necesitas. Analizamos tu caso y te proponemos la solución más efectiva.</p>
+  <a href="mailto:hola@dyssolutions.com" class="contact__cta">
+    Contactar con DYS
+  </a>
+</section>
+
+
+<!-- ════════════════════════════════════════════════
+     GSAP 3.12.5 + ScrollTrigger
+════════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const video      = document.getElementById('hero-video');
+  const loadingEl  = document.getElementById('loading-overlay');
+  const progressEl = document.getElementById('progress-bar');
+  const scrollHint = document.getElementById('scroll-hint');
+  const counterEl  = document.getElementById('counter-current');
+
+  /* 3 alturas de viewport de scroll para los 19 s del vídeo */
+  const SCROLL_VH = 3;
+
+  /*
+   * iOS Safari bloquea la manipulación de currentTime
+   * hasta que el elemento <video> haya recibido un play() explícito.
+   * Resolvemos en la primera interacción del usuario.
+   */
+  let unlocked = false;
+  function unlockVideo() {
+    if (unlocked) return;
+    unlocked = true;
+    const p = video.play();
+    if (p) p.then(() => { video.pause(); video.currentTime = 0; }).catch(() => {});
+  }
+  document.addEventListener('touchstart',  unlockVideo, { once: true, passive: true });
+  document.addEventListener('pointerdown', unlockVideo, { once: true });
+
+  /* Ocultar loader tan pronto el navegador tenga buffer suficiente */
+  function hideLoader() { loadingEl.classList.add('ready'); }
+  video.addEventListener('canplay', hideLoader, { once: true });
+
+  /* ── Inicialización ──────────────────────────────── */
+  function init() {
+    const dur = video.duration; // 19.0 s exactos
+
+    /*
+     * Convierte segundos del vídeo a posición normalizada [0–1].
+     * Permite alinear video.currentTime y tl.progress() con
+     * la misma referencia de tiempo.
+     */
+    const p = (sec) => sec / dur;
+
+    /* Timeline GSAP — pausado, controlado por scroll */
+    const tl = gsap.timeline({ paused: true });
+
+    /*
+     * MAPA TEMPORAL (vídeo 19 s | 3 transiciones de 5 s):
+     *
+     *  0.0 s  Panel 1 aparece        1.0 s  Panel 1 sale
+     *  1.0 – 6.0 s  Transición #1
+     *  5.7 s  Panel 2 aparece        7.0 s  Panel 2 sale
+     *  7.0 – 12.0 s  Transición #2
+     * 11.7 s  Panel 3 aparece       13.0 s  Panel 3 sale
+     * 13.0 – 18.0 s  Transición #3
+     * 17.7 s  Panel 4 aparece — permanece hasta el final (19 s)
+     */
+
+    /* Panel 1 */
+    tl.fromTo('#panel-1',
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.45) },
+      p(0)
+    );
+    tl.to('#panel-1',
+      { opacity: 0, y: -46, ease: 'power2.in', duration: p(0.55) },
+      p(1.0)
+    );
+
+    /* Panel 2 — entra 0.4 s antes para reducir zona muerta */
+    tl.fromTo('#panel-2',
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.45) },
+      p(5.3)
+    );
+    tl.to('#panel-2',
+      { opacity: 0, y: -46, ease: 'power2.in', duration: p(0.55) },
+      p(7.0)
+    );
+
+    /* Panel 3 — entra 0.4 s antes */
+    tl.fromTo('#panel-3',
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.45) },
+      p(11.3)
+    );
+    tl.to('#panel-3',
+      { opacity: 0, y: -46, ease: 'power2.in', duration: p(0.55) },
+      p(13.0)
+    );
+
+    /* Panel 4 — entra 0.4 s antes, permanece */
+    tl.fromTo('#panel-4',
+      { opacity: 0, y: 28 },
+      { opacity: 1, y: 0, ease: 'power2.out', duration: p(0.75) },
+      p(17.3)
+    );
+
+    /* Ancla el final del timeline en exactamente 1.0 */
+    tl.set({}, {}, 1);
+
+    /* ── ScrollTrigger ──────────────────────────────── */
+    ScrollTrigger.create({
+      trigger     : '#pin-stage',
+      pin         : true,
+      start       : 'top top',
+      end         : `+=${window.innerHeight * SCROLL_VH}`,
+      scrub       : 0.7,
+      anticipatePin: 1,
+
+      onUpdate(self) {
+        const progress = self.progress;
+
+        /* 1. Sincroniza el fotograma del vídeo con el scroll */
+        const target = progress * dur;
+        if (Math.abs(video.currentTime - target) > 0.04) {
+          video.currentTime = target;
+        }
+
+        /* 2. Avanza el timeline de textos */
+        tl.progress(progress);
+
+        /* 3. Barra de progreso */
+        progressEl.style.width = `${progress * 100}%`;
+        progressEl.setAttribute('aria-valuenow', Math.round(progress * 100));
+
+        /* 4. Contador — refleja el servicio activo o próximo */
+        const t = progress * dur;
+        let idx = 0;
+        if      (t >= 17.3) idx = 3;
+        else if (t >= 11.3) idx = 2;
+        else if (t >=  5.3) idx = 1;
+        const label = String(idx + 1).padStart(2, '0');
+        if (counterEl.textContent !== label) counterEl.textContent = label;
+
+        /* 5. Ocultar/mostrar indicador de scroll */
+        if (progress > 0.015) scrollHint.classList.add('hidden');
+        else scrollHint.classList.remove('hidden');
+      }
+    });
+
+    /* Recalcula pin al rotar el dispositivo o redimensionar */
+    window.addEventListener('resize', () => ScrollTrigger.refresh(), { passive: true });
+  }
+
+  /* Punto de entrada: detecta si los metadatos ya están disponibles (caché) */
+  if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    hideLoader();
+    init();
+  } else {
+    video.addEventListener('loadedmetadata', () => { hideLoader(); init(); }, { once: true });
+  }
+
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════
+     Before/After Drag Sliders
+════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+
+  document.querySelectorAll('.ba-slider').forEach(function (slider) {
+    var handle  = slider.querySelector('.ba-handle');
+    var dragging = false;
+
+    function setPosition(clientX) {
+      var rect = slider.getBoundingClientRect();
+      var pct  = clamp(((clientX - rect.left) / rect.width) * 100, 2, 98);
+      slider.style.setProperty('--split', pct + '%');
+    }
+
+    /* ── Mouse ── */
+    handle.addEventListener('mousedown', function (e) {
+      dragging = true;
+      e.preventDefault();
+    });
+    window.addEventListener('mouseup', function () { dragging = false; });
+    window.addEventListener('mousemove', function (e) {
+      if (dragging) setPosition(e.clientX);
+    });
+
+    /* ── Touch ── */
+    slider.addEventListener('touchstart', function (e) {
+      dragging = true;
+      setPosition(e.touches[0].clientX);
+    }, { passive: true });
+
+    slider.addEventListener('touchend', function () { dragging = false; });
+
+    slider.addEventListener('touchmove', function (e) {
+      if (!dragging) return;
+      setPosition(e.touches[0].clientX);
+      e.preventDefault(); /* impide scroll vertical mientras se arrastra */
+    }, { passive: false });
+
+    /* ── Click directo en cualquier punto del slider ── */
+    slider.addEventListener('click', function (e) { setPosition(e.clientX); });
+
+    /* ── Teclado (accesibilidad) ── */
+    slider.addEventListener('keydown', function (e) {
+      var current = parseFloat(slider.style.getPropertyValue('--split') || '50');
+      var step    = e.shiftKey ? 10 : 5;
+      if (e.key === 'ArrowLeft') {
+        slider.style.setProperty('--split', clamp(current - step, 2, 98) + '%');
+        e.preventDefault();
+      }
+      if (e.key === 'ArrowRight') {
+        slider.style.setProperty('--split', clamp(current + step, 2, 98) + '%');
+        e.preventDefault();
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
