@@ -1,7 +1,14 @@
 # Vídeo antiguo — reemplazado por hero-movie1.mp4
 assets/hero-movie.mp4
 
+# Variables de entorno — NUNCA subir al repo
+.env
+.env.local
+.env.production
+.env*.local
+
 # Sistema
 .DS_Store
 Thumbs.db
 desktop.ini
+node_modules/

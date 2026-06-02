@@ -488,6 +488,236 @@
     .contact__cta:hover { opacity: .88; transform: translateY(-1px); }
 
     /* ════════════════════════════════════════════════
+       CHATBOT
+    ════════════════════════════════════════════════ */
+
+    #chat-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    /* ── Botón flotante ── */
+    #chat-toggle {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,.45);
+      transition: transform .2s ease, box-shadow .2s ease;
+      position: relative;
+      z-index: 2;
+    }
+    #chat-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 32px rgba(0,0,0,.55); }
+    #chat-toggle svg { position: absolute; transition: opacity .2s ease, transform .2s ease; }
+    #chat-toggle .icon-chat  { opacity: 1;  transform: scale(1); }
+    #chat-toggle .icon-close { opacity: 0;  transform: scale(.7); }
+    #chat-widget.open #chat-toggle .icon-chat  { opacity: 0;  transform: scale(.7); }
+    #chat-widget.open #chat-toggle .icon-close { opacity: 1;  transform: scale(1); }
+
+    /* Notificación punto rojo */
+    #chat-toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      width: 10px;
+      height: 10px;
+      background: #22c55e;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      transition: opacity .3s ease;
+    }
+    #chat-widget.open #chat-toggle::after { opacity: 0; }
+
+    /* ── Panel ── */
+    #chat-panel {
+      position: absolute;
+      bottom: 66px;
+      right: 0;
+      width: 360px;
+      height: 500px;
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 48px rgba(0,0,0,.6);
+      transform: scale(.92) translateY(12px);
+      transform-origin: bottom right;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), opacity .2s ease;
+    }
+    #chat-widget.open #chat-panel {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    @media (max-width: 420px) {
+      #chat-panel {
+        width: calc(100vw - 32px);
+        right: -8px;
+      }
+    }
+
+    /* ── Header del panel ── */
+    #chat-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .chat-header-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chat-online-dot {
+      width: 8px;
+      height: 8px;
+      background: #22c55e;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(34,197,94,.6);
+    }
+    .chat-header-name {
+      font-size: .82rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.01em;
+    }
+    .chat-header-sub {
+      font-size: .65rem;
+      font-weight: 400;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.3);
+    }
+
+    /* ── Mensajes ── */
+    #chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    /* Scrollbar — webkit cubre Chrome, Safari, Edge, Samsung */
+    #chat-messages::-webkit-scrollbar { width: 4px; }
+    #chat-messages::-webkit-scrollbar-track { background: transparent; }
+    #chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+    /* Firefox */
+    @supports (scrollbar-width: thin) {
+      #chat-messages { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.1) transparent; }
+    }
+
+    .chat-msg {
+      max-width: 82%;
+      font-size: .82rem;
+      line-height: 1.55;
+      padding: 9px 13px;
+      border-radius: 12px;
+      animation: msgIn .2s ease;
+      word-break: break-word;
+    }
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .chat-msg.user {
+      align-self: flex-end;
+      background: rgba(255,255,255,.1);
+      color: rgba(255,255,255,.9);
+      border-bottom-right-radius: 4px;
+    }
+    .chat-msg.assistant {
+      align-self: flex-start;
+      background: rgba(255,255,255,.05);
+      color: rgba(255,255,255,.78);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Indicador de escritura */
+    .chat-typing {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 13px;
+      background: rgba(255,255,255,.05);
+      border-radius: 12px;
+      border-bottom-left-radius: 4px;
+      align-self: flex-start;
+    }
+    .chat-typing span {
+      width: 6px;
+      height: 6px;
+      background: rgba(255,255,255,.4);
+      border-radius: 50%;
+      animation: typingDot 1.2s ease infinite;
+    }
+    .chat-typing span:nth-child(2) { animation-delay: .2s; }
+    .chat-typing span:nth-child(3) { animation-delay: .4s; }
+    @keyframes typingDot {
+      0%, 60%, 100% { transform: translateY(0);    opacity: .4; }
+      30%           { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ── Input ── */
+    #chat-input-area {
+      padding: 12px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    #chat-input {
+      flex: 1;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: .82rem;
+      color: #fff;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      line-height: 1.4;
+      max-height: 100px;
+      transition: border-color .2s ease;
+    }
+    #chat-input::placeholder { color: rgba(255,255,255,.25); }
+    #chat-input:focus { border-color: rgba(255,255,255,.25); }
+    #chat-send {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: #fff;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: opacity .2s ease, transform .15s ease;
+    }
+    #chat-send:hover { opacity: .85; transform: scale(1.05); }
+    #chat-send:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+
+    /* ════════════════════════════════════════════════
        VÍDEOS — Reels de producción
     ════════════════════════════════════════════════ */
 
@@ -1366,6 +1596,244 @@
       }
     });
   });
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════
+     CHATBOT WIDGET
+════════════════════════════════════════════════ -->
+
+<!-- HTML del widget -->
+<div id="chat-widget" role="complementary" aria-label="Asistente DYS Solutions">
+
+  <!-- Botón flotante -->
+  <button id="chat-toggle" type="button" aria-label="Abrir chat con DYS Solutions" aria-expanded="false">
+    <!-- Icono chat -->
+    <svg class="icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <!-- Icono cerrar -->
+    <svg class="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  </button>
+
+  <!-- Panel de chat -->
+  <div id="chat-panel" role="dialog" aria-modal="false" aria-label="Chat DYS Solutions" hidden>
+    <!-- Cabecera -->
+    <div id="chat-header">
+      <div class="chat-header-brand">
+        <span class="chat-online-dot" aria-hidden="true"></span>
+        <span class="chat-header-name">DYS Solutions</span>
+      </div>
+      <span class="chat-header-sub">Asistente</span>
+    </div>
+
+    <!-- Mensajes -->
+    <div id="chat-messages" role="log" aria-live="polite" aria-label="Mensajes del chat"></div>
+
+    <!-- Input -->
+    <div id="chat-input-area">
+      <textarea
+        id="chat-input"
+        placeholder="Escribe tu pregunta..."
+        rows="1"
+        aria-label="Mensaje"
+        maxlength="600"
+      ></textarea>
+      <button id="chat-send" type="button" aria-label="Enviar mensaje" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Elementos ── */
+  const widget    = document.getElementById('chat-widget');
+  const toggle    = document.getElementById('chat-toggle');
+  const panel     = document.getElementById('chat-panel');
+  const messages  = document.getElementById('chat-messages');
+  const input     = document.getElementById('chat-input');
+  const sendBtn   = document.getElementById('chat-send');
+
+  /* ── Estado ── */
+  let isOpen       = false;
+  let isSending    = false;
+  let initialized  = false;
+  const history    = []; /* historial para la API */
+
+  const MAX_HISTORY = 20;
+  const WELCOME     = 'Hola 👋 Soy el asistente de DYS Solutions. ¿Tienes algún proyecto en mente o quieres saber más sobre lo que hacemos?';
+
+  /* ── Toggle del panel ── */
+  function openChat() {
+    isOpen = true;
+    widget.classList.add('open');
+    panel.hidden = false;
+    toggle.setAttribute('aria-expanded', 'true');
+
+    if (!initialized) {
+      initialized = true;
+      addMessage(WELCOME, 'assistant');
+    }
+
+    /* Foco en el input tras la animación */
+    setTimeout(() => input.focus(), 260);
+  }
+
+  function closeChat() {
+    isOpen = false;
+    widget.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    /* Ocultamos con delay para que termine la animación CSS */
+    setTimeout(() => { panel.hidden = true; }, 220);
+  }
+
+  toggle.addEventListener('click', () => isOpen ? closeChat() : openChat());
+
+  /* Cerrar con Escape */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && isOpen) closeChat();
+  });
+
+  /* ── Helpers de UI ── */
+  function addMessage(text, role) {
+    const el = document.createElement('div');
+    el.className = `chat-msg ${role}`;
+    el.textContent = text;
+    messages.appendChild(el);
+    scrollBottom();
+    return el;
+  }
+
+  function addTyping() {
+    const el = document.createElement('div');
+    el.className = 'chat-typing';
+    el.setAttribute('aria-label', 'Escribiendo...');
+    el.innerHTML = '<span></span><span></span><span></span>';
+    messages.appendChild(el);
+    scrollBottom();
+    return el;
+  }
+
+  function scrollBottom() {
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function setLoading(loading) {
+    isSending  = loading;
+    sendBtn.disabled = loading;
+    input.disabled   = loading;
+  }
+
+  /* ── Auto-resize del textarea ── */
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 100) + 'px';
+    sendBtn.disabled = isSending || input.value.trim().length === 0;
+  });
+
+  /* ── Enviar con Enter (Shift+Enter = nueva línea) ── */
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!isSending && input.value.trim()) sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener('click', () => {
+    if (!isSending && input.value.trim()) sendMessage();
+  });
+
+  /* ── Envío del mensaje ── */
+  async function sendMessage() {
+    const text = input.value.trim();
+    if (!text || isSending) return;
+
+    /* Guardrail cliente: límite de conversación */
+    if (history.length >= MAX_HISTORY) {
+      addMessage('Esta conversación ha alcanzado su límite. Escríbenos directamente a hola@dyssolutions.com', 'assistant');
+      setLoading(true); /* bloquear permanentemente */
+      return;
+    }
+
+    /* Añadir mensaje del usuario */
+    addMessage(text, 'user');
+    history.push({ role: 'user', content: text });
+
+    /* Limpiar input */
+    input.value = '';
+    input.style.height = 'auto';
+    setLoading(true);
+
+    /* Indicador de escritura */
+    const typing = addTyping();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ messages: history }),
+      });
+
+      typing.remove();
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      /* ── Leer stream SSE ── */
+      const reader  = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer    = '';
+      let fullText  = '';
+      const aiEl    = addMessage('', 'assistant');
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') continue;
+
+          try {
+            const chunk = JSON.parse(data);
+            const delta = chunk?.choices?.[0]?.delta?.content ?? '';
+            if (delta) {
+              fullText += delta;
+              aiEl.textContent = fullText;
+              scrollBottom();
+            }
+          } catch { /* chunk malformado, ignorar */ }
+        }
+      }
+
+      /* Guardar respuesta en historial */
+      if (fullText) {
+        history.push({ role: 'assistant', content: fullText });
+      }
+
+    } catch (err) {
+      typing.remove();
+      addMessage('Ha habido un error. Por favor intenta de nuevo o escríbenos a hola@dyssolutions.com', 'assistant');
+      /* Revertir el último mensaje del usuario del historial */
+      if (history[history.length - 1]?.role === 'user') history.pop();
+    }
+
+    setLoading(false);
+    input.focus();
+  }
+
 })();
 </script>
 
