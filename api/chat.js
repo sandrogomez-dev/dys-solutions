@@ -1,9 +1,11 @@
 /**
- * DYS Solutions — Chat API (Vercel Serverless Function, Node.js)
+ * DYS Solutions — Chat API (Vercel Serverless Function, Node.js streaming)
  *
- * API key configurada en Vercel Dashboard → Settings → Environment Variables
- * como: DEEPSEEK_API_KEY = sk-xxxxxxxxxxxxxx
+ * API key: Vercel Dashboard → Settings → Environment Variables
+ * Nombre: DEEPSEEK_API_KEY
  */
+
+import { Readable } from 'node:stream';
 
 const SYSTEM_PROMPT = `Eres el asistente digital de DYS Solutions, una agencia digital premium especializada en:
 
@@ -39,7 +41,6 @@ const MAX_MSG_LENGTH = 600;
 const MAX_TOKENS_OUT = 350;
 
 export default async function handler(req, res) {
-  /* ── CORS mínimo ── */
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -47,32 +48,27 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  /* ── Validación ── */
   const { messages } = req.body || {};
 
-  if (!Array.isArray(messages) || messages.length === 0) {
+  if (!Array.isArray(messages) || messages.length === 0)
     return res.status(400).json({ error: 'messages array required' });
-  }
-  if (messages.length > MAX_MESSAGES) {
+  if (messages.length > MAX_MESSAGES)
     return res.status(429).json({ error: 'Conversation too long' });
-  }
 
   const clean = messages
     .filter(m => ['user', 'assistant'].includes(m?.role) && typeof m?.content === 'string')
     .map(m => ({ role: m.role, content: m.content.slice(0, MAX_MSG_LENGTH) }));
 
-  if (clean.length === 0) {
+  if (clean.length === 0)
     return res.status(400).json({ error: 'No valid messages' });
-  }
 
-  /* ── API key ── */
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) return res.status(503).json({ error: 'Service not configured' });
 
-  /* ── Llamada a DeepSeek ── */
+  let upstream;
   try {
-    const upstream = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
+    upstream = await fetch('https://api.deepseek.com/chat/completions', {
+      method:  'POST',
       headers: {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${apiKey}`,
@@ -80,25 +76,29 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model:       'deepseek-v4-flash',
         messages:    [{ role: 'system', content: SYSTEM_PROMPT }, ...clean],
-        stream:      false,
+        stream:      true,
         max_tokens:  MAX_TOKENS_OUT,
         temperature: 0.7,
       }),
     });
-
-    if (!upstream.ok) {
-      const err = await upstream.text();
-      console.error('DeepSeek error:', err);
-      return res.status(502).json({ error: 'Upstream API error' });
-    }
-
-    const data    = await upstream.json();
-    const content = data?.choices?.[0]?.message?.content ?? '';
-
-    return res.status(200).json({ content });
-
   } catch (err) {
-    console.error('Handler error:', err);
-    return res.status(500).json({ error: 'Service unavailable' });
+    console.error('Fetch error:', err);
+    return res.status(502).json({ error: 'Could not reach API' });
   }
+
+  if (!upstream.ok) {
+    const body = await upstream.text();
+    console.error('DeepSeek error:', body);
+    return res.status(502).json({ error: 'Upstream API error' });
+  }
+
+  /* ── Piping del stream de DeepSeek al cliente ──────────────────────────
+   * Readable.fromWeb() convierte el Web ReadableStream (fetch) a un
+   * Node.js Readable que podemos pipear directamente al response.
+   */
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('X-Accel-Buffering', 'no');
+
+  Readable.fromWeb(upstream.body).pipe(res);
 }
