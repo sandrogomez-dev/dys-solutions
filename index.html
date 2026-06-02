@@ -1751,6 +1751,26 @@
     if (!isSending && input.value.trim()) sendMessage();
   });
 
+  /* ── Efecto typewriter ─────────────────────────────
+   * Escribe el texto carácter a carácter.
+   * Velocidad variable: más rápido en espacios, más lento en puntuación.
+   */
+  function typewrite(el, text) {
+    return new Promise(resolve => {
+      let i = 0;
+      function next() {
+        if (i >= text.length) { resolve(); return; }
+        el.textContent += text[i];
+        scrollBottom();
+        const ch    = text[i];
+        const delay = /[.!?]/.test(ch) ? 60 : /[,;:]/.test(ch) ? 30 : 14;
+        i++;
+        setTimeout(next, delay);
+      }
+      next();
+    });
+  }
+
   /* ── Envío del mensaje ── */
   async function sendMessage() {
     const text = input.value.trim();
@@ -1786,47 +1806,18 @@
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      /* ── Leer stream SSE ── */
-      const reader  = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer    = '';
-      let fullText  = '';
-      const aiEl    = addMessage('', 'assistant');
+      const { content } = await res.json();
+      if (!content) throw new Error('Empty response');
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      /* ── Efecto typewriter (visualmente idéntico al streaming) ── */
+      const aiEl = addMessage('', 'assistant');
+      await typewrite(aiEl, content);
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const data = line.slice(6).trim();
-          if (data === '[DONE]') continue;
-
-          try {
-            const chunk = JSON.parse(data);
-            const delta = chunk?.choices?.[0]?.delta?.content ?? '';
-            if (delta) {
-              fullText += delta;
-              aiEl.textContent = fullText;
-              scrollBottom();
-            }
-          } catch { /* chunk malformado, ignorar */ }
-        }
-      }
-
-      /* Guardar respuesta en historial */
-      if (fullText) {
-        history.push({ role: 'assistant', content: fullText });
-      }
+      history.push({ role: 'assistant', content });
 
     } catch (err) {
       typing.remove();
       addMessage('Ha habido un error. Por favor intenta de nuevo o escríbenos a hola@dyssolutions.com', 'assistant');
-      /* Revertir el último mensaje del usuario del historial */
       if (history[history.length - 1]?.role === 'user') history.pop();
     }
 

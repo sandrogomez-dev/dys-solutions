@@ -1,17 +1,10 @@
 /**
- * DYS Solutions — Chat API (Vercel Edge Function)
+ * DYS Solutions — Chat API (Vercel Serverless Function, Node.js)
  *
- * La API key de DeepSeek NUNCA se expone al cliente.
- * Configúrala en Vercel Dashboard → Settings → Environment Variables
+ * API key configurada en Vercel Dashboard → Settings → Environment Variables
  * como: DEEPSEEK_API_KEY = sk-xxxxxxxxxxxxxx
  */
 
-export const config = { runtime: 'edge' };
-
-/* ── System prompt ─────────────────────────────────────────────────────────
- * Define la personalidad, límites y objetivos del asistente.
- * Edita este bloque para afinar el comportamiento sin tocar lógica.
- */
 const SYSTEM_PROMPT = `Eres el asistente digital de DYS Solutions, una agencia digital premium especializada en:
 
 1. DISEÑO WEB — Interfaces de alto rendimiento orientadas a la conversión con estética premium.
@@ -41,86 +34,71 @@ LO QUE NO HACES:
 PORTFOLIO REAL: ProCar Sales (automoción), Madu Box (fitness y boxeo), Jardines Raúl Aguiló (jardinería en Mallorca).
 CONTACTO PARA PRESUPUESTOS: hola@dyssolutions.com`;
 
-/* ── Guardrails ────────────────────────────────────────────────────────────
- * Límites técnicos aplicados en servidor para evitar abuso.
- */
-const MAX_MESSAGES    = 20;   /* conversaciones largas fuera de rango */
-const MAX_MSG_LENGTH  = 600;  /* caracteres por mensaje del usuario  */
-const MAX_TOKENS_OUT  = 350;  /* respuestas concisas                  */
+const MAX_MESSAGES   = 20;
+const MAX_MSG_LENGTH = 600;
+const MAX_TOKENS_OUT = 350;
 
-export default async function handler(request) {
+export default async function handler(req, res) {
+  /* ── CORS mínimo ── */
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  /* ── Método ── */
-  if (request.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 });
-  }
-
-  /* ── Body ── */
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return new Response('Invalid JSON', { status: 400 });
-  }
-
-  const { messages } = body;
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
   /* ── Validación ── */
+  const { messages } = req.body || {};
+
   if (!Array.isArray(messages) || messages.length === 0) {
-    return new Response('messages array required', { status: 400 });
+    return res.status(400).json({ error: 'messages array required' });
   }
   if (messages.length > MAX_MESSAGES) {
-    return new Response('Conversation too long', { status: 429 });
+    return res.status(429).json({ error: 'Conversation too long' });
   }
 
-  /* Sanitización: solo roles válidos, longitud máxima */
   const clean = messages
     .filter(m => ['user', 'assistant'].includes(m?.role) && typeof m?.content === 'string')
-    .map(m => ({
-      role   : m.role,
-      content: m.content.slice(0, MAX_MSG_LENGTH),
-    }));
+    .map(m => ({ role: m.role, content: m.content.slice(0, MAX_MSG_LENGTH) }));
 
   if (clean.length === 0) {
-    return new Response('No valid messages', { status: 400 });
+    return res.status(400).json({ error: 'No valid messages' });
   }
+
+  /* ── API key ── */
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) return res.status(503).json({ error: 'Service not configured' });
 
   /* ── Llamada a DeepSeek ── */
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-  if (!apiKey) {
-    return new Response('Service not configured', { status: 503 });
-  }
-
-  let upstream;
   try {
-    upstream = await fetch('https://api.deepseek.com/chat/completions', {
-      method : 'POST',
+    const upstream = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
       headers: {
-        'Content-Type' : 'application/json',
+        'Content-Type':  'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model     : 'deepseek-v4-flash',
-        messages  : [{ role: 'system', content: SYSTEM_PROMPT }, ...clean],
-        stream    : true,
-        max_tokens: MAX_TOKENS_OUT,
+        model:       'deepseek-v4-flash',
+        messages:    [{ role: 'system', content: SYSTEM_PROMPT }, ...clean],
+        stream:      false,
+        max_tokens:  MAX_TOKENS_OUT,
         temperature: 0.7,
       }),
     });
-  } catch {
-    return new Response('Upstream error', { status: 502 });
-  }
 
-  if (!upstream.ok) {
-    return new Response('API error', { status: upstream.status });
-  }
+    if (!upstream.ok) {
+      const err = await upstream.text();
+      console.error('DeepSeek error:', err);
+      return res.status(502).json({ error: 'Upstream API error' });
+    }
 
-  /* ── Proxy del stream directamente al cliente ── */
-  return new Response(upstream.body, {
-    headers: {
-      'Content-Type' : 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'X-Accel-Buffering': 'no',
-    },
-  });
+    const data    = await upstream.json();
+    const content = data?.choices?.[0]?.message?.content ?? '';
+
+    return res.status(200).json({ content });
+
+  } catch (err) {
+    console.error('Handler error:', err);
+    return res.status(500).json({ error: 'Service unavailable' });
+  }
 }
