@@ -1751,6 +1751,53 @@
     if (!isSending && input.value.trim()) sendMessage();
   });
 
+  /* ── Detección y captura de lead ──────────────────────────────────────
+   * El bot escribe un bloque estructurado cuando recoge contacto:
+   *   ===LEAD_CAPTURADO===
+   *   Nombre: ...
+   *   Email:  ...
+   *   Resumen: ...
+   *   ===FIN_LEAD===
+   *
+   * Lo parseamos, notificamos a DYS y limpiamos el bloque del mensaje
+   * para que el usuario solo vea el texto natural que sigue.
+   */
+  let leadCaptured = false;
+
+  function detectAndCaptureLead(text) {
+    if (leadCaptured) return;
+
+    const match = text.match(/===LEAD_CAPTURADO===([\s\S]*?)===FIN_LEAD===/);
+    if (!match) return;
+
+    leadCaptured = true;
+    const block   = match[1];
+    const name    = (block.match(/Nombre:\s*(.+)/)   || [])[1]?.trim() || '';
+    const email   = (block.match(/Email:\s*(.+)/)    || [])[1]?.trim() || '';
+    const summary = (block.match(/Resumen:\s*([\s\S]+?)(?:\n===|$)/) || [])[1]?.trim() || '';
+
+    /* Limpiar el bloque técnico del último mensaje mostrado */
+    const msgs = document.querySelectorAll('.chat-msg.assistant');
+    const last = msgs[msgs.length - 1];
+    if (last) {
+      last.textContent = last.textContent
+        .replace(/===LEAD_CAPTURADO===[\s\S]*?===FIN_LEAD===/g, '')
+        .trim();
+    }
+
+    /* Notificar a DYS en segundo plano — no bloquea la UX */
+    fetch('/api/lead', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        name,
+        email,
+        summary,
+        conversation: history.filter(m => m.role !== 'system'),
+      }),
+    }).catch(() => { /* silencioso — no afecta al usuario */ });
+  }
+
   /* ── Envío del mensaje ── */
   async function sendMessage() {
     const text = input.value.trim();
@@ -1812,7 +1859,10 @@
         }
       }
 
-      if (fullText) history.push({ role: 'assistant', content: fullText });
+      if (fullText) {
+        history.push({ role: 'assistant', content: fullText });
+        detectAndCaptureLead(fullText);
+      }
 
     } catch (err) {
       typing.remove();
