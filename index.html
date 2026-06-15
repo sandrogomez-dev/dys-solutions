@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,900&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="assets/dys-solutions1-1.png" />
 
   <style>
     /* ── Reset ────────────────────────────────────────── */
@@ -72,12 +73,16 @@
     }
 
     .nav-logo {
-      font-size: .86rem;
-      font-weight: 700;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: #fff;
+      display: flex;
+      align-items: center;
       text-decoration: none;
+      flex-shrink: 0;
+    }
+    .nav-logo img {
+      height: 26px;
+      width: auto;
+      display: block;
+      mix-blend-mode: lighten;
     }
 
     .nav-links {
@@ -776,13 +781,19 @@
     }
 
     .footer-logo {
-      font-size: .8rem;
-      font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.22);
+      display: flex;
+      align-items: center;
       text-decoration: none;
     }
+    .footer-logo img {
+      height: 18px;
+      width: auto;
+      display: block;
+      mix-blend-mode: lighten;
+      opacity: 0.3;
+      transition: opacity .2s ease;
+    }
+    .footer-logo:hover img { opacity: 0.55; }
 
     .footer-links {
       display: flex;
@@ -978,7 +989,9 @@
      NAV
 ════════════════════════════════════════════════ -->
 <nav id="nav" aria-label="Navegación principal">
-  <a href="#" class="nav-logo">DYS</a>
+  <a href="#" class="nav-logo">
+    <img src="assets/dys-solutions3-1.png" alt="DYS Solutions" />
+  </a>
   <ul class="nav-links" role="list">
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#work">Trabajo</a></li>
@@ -1292,7 +1305,9 @@
      FOOTER
 ════════════════════════════════════════════════ -->
 <footer>
-  <a href="#" class="footer-logo">DYS Solutions</a>
+  <a href="#" class="footer-logo">
+    <img src="assets/dys-solutions3-1.png" alt="DYS Solutions" />
+  </a>
   <ul class="footer-links" role="list">
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#work">Trabajo</a></li>
