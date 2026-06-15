@@ -5,18 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="DYS Solutions — Estudio de presencia digital. Diseño web, producción de vídeo e IA aplicada para negocios que quieren ser encontrados y elegidos." />
   <title>DYS Solutions — Estudio de Presencia Digital</title>
+  <link rel="icon" type="image/png" href="assets/dys-solutions1-1.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,900&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/png" href="assets/dys-solutions1-1.png" />
 
   <style>
     /* ── Reset ────────────────────────────────────────── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
-      background: #0a0a0a;
+      background: #080808;
       color: #fff;
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
@@ -25,33 +25,42 @@
 
     /* ── Design tokens ───────────────────────────────── */
     :root {
-      --bg:      #0a0a0a;
-      --bg-2:    #111111;
-      --bg-3:    #181818;
+      --bg:      #080808;
+      --bg-2:    #0e0e0e;
+      --bg-3:    #161616;
       --border:  rgba(255,255,255,.07);
+      --border-c: rgba(255,255,255,.1);
       --text-2:  rgba(255,255,255,.5);
-      --text-3:  rgba(255,255,255,.25);
-      --pad-x:   clamp(1.5rem, 6vw, 5rem);
-      --pad-y:   clamp(5rem, 11vh, 8rem);
+      --text-3:  rgba(255,255,255,.22);
+      --radius:  14px;
+      --pad-x:   clamp(1.5rem, 5vw, 3rem);
+      --pad-y:   clamp(4.5rem, 10vh, 7.5rem);
+    }
+
+    /* ── Max-width container ─────────────────────────── */
+    .w {
+      max-width: 1200px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
     }
 
     /* ── Scroll fade-in ──────────────────────────────── */
     .fade-in {
       opacity: 0;
-      transform: translateY(18px);
-      transition: opacity .65s ease, transform .65s ease;
+      transform: translateY(16px);
+      transition: opacity .6s ease, transform .6s ease;
     }
     .fade-in.visible { opacity: 1; transform: translateY(0); }
 
     /* ── Shared label ────────────────────────────────── */
     .section-label {
       display: block;
-      font-size: clamp(.54rem, .88vw, .64rem);
+      font-size: clamp(.52rem, .85vw, .62rem);
       font-weight: 600;
       letter-spacing: .28em;
       text-transform: uppercase;
       color: var(--text-3);
-      margin-bottom: 1.1rem;
+      margin-bottom: 1rem;
     }
 
     /* ════════════════════════════════════════════════
@@ -62,14 +71,20 @@
       top: 0; left: 0; right: 0;
       z-index: 100;
       height: 62px;
+      background: rgba(8,8,8,.9);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 var(--pad-x);
-      background: rgba(10,10,10,.88);
-      -webkit-backdrop-filter: blur(14px);
-      backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border);
     }
 
     .nav-logo {
@@ -109,15 +124,13 @@
       background: #fff;
       text-decoration: none;
       padding: .55rem 1.2rem;
-      border-radius: 4px;
-      transition: opacity .2s ease;
+      border-radius: 8px;
+      transition: opacity .2s ease, transform .15s ease;
       white-space: nowrap;
     }
-    .nav-cta:hover { opacity: .85; }
+    .nav-cta:hover { opacity: .88; transform: translateY(-1px); }
 
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-    }
+    @media (max-width: 768px) { .nav-links { display: none; } }
 
     /* ════════════════════════════════════════════════
        HERO
@@ -127,7 +140,6 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: calc(62px + clamp(4rem,8vh,7rem)) var(--pad-x) var(--pad-y);
       border-bottom: 1px solid var(--border);
       position: relative;
       overflow: hidden;
@@ -138,57 +150,70 @@
       position: absolute;
       inset: 0;
       background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 64px 64px;
+        linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+      background-size: 56px 56px;
       pointer-events: none;
     }
 
     #hero::after {
       content: '';
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 40%;
-      background: linear-gradient(to top, var(--bg), transparent);
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 0% 50%, rgba(255,255,255,.03) 0%, transparent 65%),
+        linear-gradient(to top, var(--bg) 0%, transparent 40%);
       pointer-events: none;
     }
 
     .hero-content {
       position: relative;
       z-index: 1;
-      max-width: 1000px;
+      padding: calc(62px + clamp(4rem,8vh,7rem)) var(--pad-x) var(--pad-y);
+      max-width: 1200px;
+      margin-inline: auto;
+      width: 100%;
     }
 
     .hero-tag {
-      display: inline-block;
-      font-size: clamp(.54rem, .88vw, .64rem);
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      font-size: clamp(.52rem, .85vw, .62rem);
       font-weight: 600;
-      letter-spacing: .28em;
+      letter-spacing: .26em;
       text-transform: uppercase;
       color: var(--text-3);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-c);
       padding: .42rem .95rem;
       border-radius: 100px;
-      margin-bottom: clamp(1.75rem, 4.5vh, 3rem);
+      margin-bottom: clamp(2rem, 5vh, 3.5rem);
+    }
+    .hero-tag::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.3);
+      flex-shrink: 0;
     }
 
     #hero h1 {
-      font-size: clamp(3.2rem, 10vw, 9rem);
+      font-size: clamp(3rem, 10vw, 8.5rem);
       font-weight: 900;
-      letter-spacing: -.04em;
-      line-height: .92;
+      letter-spacing: -.045em;
+      line-height: .91;
       color: #fff;
       margin-bottom: clamp(1.5rem, 3.5vh, 2.5rem);
     }
+    #hero h1 .dim { color: rgba(255,255,255,.22); }
 
-    #hero h1 .dim { color: rgba(255,255,255,.28); }
-
-    #hero p {
-      font-size: clamp(.95rem, 1.8vw, 1.1rem);
+    #hero > .hero-content > p {
+      font-size: clamp(.95rem, 1.75vw, 1.08rem);
       font-weight: 400;
-      line-height: 1.72;
+      line-height: 1.75;
       color: var(--text-2);
-      max-width: 50ch;
+      max-width: 48ch;
       margin-bottom: clamp(2.5rem, 5.5vh, 4rem);
     }
 
@@ -205,66 +230,94 @@
       gap: .45rem;
       background: #fff;
       color: #000;
-      font-size: clamp(.78rem, 1.25vw, .88rem);
+      font-size: .85rem;
       font-weight: 700;
-      letter-spacing: .04em;
+      letter-spacing: .02em;
       text-decoration: none;
-      padding: .9rem 1.85rem;
-      border-radius: 4px;
-      transition: opacity .2s ease, transform .2s ease;
+      padding: .88rem 1.85rem;
+      border-radius: 10px;
+      transition: opacity .2s ease, transform .2s ease, box-shadow .2s ease;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.15), 0 4px 16px rgba(0,0,0,.4);
     }
-    .btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-primary:hover {
+      opacity: .92;
+      transform: translateY(-1px);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.2), 0 8px 24px rgba(0,0,0,.5);
+    }
 
     .btn-ghost {
-      font-size: clamp(.78rem, 1.25vw, .88rem);
+      font-size: .85rem;
       font-weight: 500;
       color: var(--text-2);
       text-decoration: none;
       transition: color .2s ease;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
     }
     .btn-ghost:hover { color: #fff; }
+
+    /* ════════════════════════════════════════════════
+       SHARED SECTION HEADER
+    ════════════════════════════════════════════════ */
+    .section-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: clamp(2.5rem, 6vh, 4.5rem);
+      padding-bottom: clamp(1.75rem, 4vh, 3rem);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-head h2 {
+      font-size: clamp(1.6rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: .97;
+      color: #fff;
+      margin-top: .75rem;
+    }
+
+    .section-head p {
+      font-size: clamp(.8rem, 1.3vw, .9rem);
+      color: var(--text-2);
+      max-width: 34ch;
+      line-height: 1.7;
+    }
 
     /* ════════════════════════════════════════════════
        PROBLEMA
     ════════════════════════════════════════════════ */
     #problema {
-      padding: var(--pad-y) var(--pad-x);
+      padding-block: var(--pad-y);
       border-bottom: 1px solid var(--border);
-    }
-
-    .problema-intro {
-      margin-bottom: clamp(3rem, 7vh, 5rem);
-    }
-
-    .problema-intro h2 {
-      font-size: clamp(1.6rem, 4vw, 3rem);
-      font-weight: 900;
-      letter-spacing: -.035em;
-      line-height: .98;
-      color: #fff;
-      max-width: 28ch;
     }
 
     .problema-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
+      gap: 1.25rem;
     }
 
     .problema-card {
-      background: var(--bg);
-      padding: clamp(1.75rem, 3.5vw, 2.5rem);
+      background: var(--bg-2);
+      border: 1px solid var(--border-c);
+      border-radius: var(--radius);
+      padding: clamp(1.75rem, 3.5vw, 2.25rem);
       display: flex;
       flex-direction: column;
-      gap: 1.1rem;
-      transition: background .25s ease;
+      gap: 1rem;
+      transition: border-color .25s ease, background .25s ease;
     }
-    .problema-card:hover { background: var(--bg-2); }
+    .problema-card:hover {
+      border-color: rgba(255,255,255,.2);
+      background: var(--bg-3);
+    }
 
     .problema-num {
-      font-size: clamp(.54rem, .88vw, .64rem);
+      font-size: clamp(.52rem, .85vw, .62rem);
       font-weight: 700;
       letter-spacing: .2em;
       color: var(--text-3);
@@ -272,15 +325,15 @@
     }
 
     .problema-card h3 {
-      font-size: clamp(1.05rem, 2.1vw, 1.4rem);
+      font-size: clamp(1.05rem, 2.1vw, 1.35rem);
       font-weight: 700;
-      letter-spacing: -.02em;
+      letter-spacing: -.025em;
       line-height: 1.1;
       color: #fff;
     }
 
     .problema-card p {
-      font-size: clamp(.8rem, 1.3vw, .9rem);
+      font-size: clamp(.8rem, 1.3vw, .88rem);
       line-height: 1.72;
       color: var(--text-2);
     }
@@ -289,60 +342,37 @@
        SERVICIOS
     ════════════════════════════════════════════════ */
     #servicios {
-      padding: var(--pad-y) var(--pad-x);
+      padding-block: var(--pad-y);
       border-bottom: 1px solid var(--border);
       background: var(--bg-2);
-    }
-
-    .servicios-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 2rem;
-      margin-bottom: clamp(3rem, 7vh, 5rem);
-      padding-bottom: clamp(2rem, 4.5vh, 3.5rem);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .servicios-header h2 {
-      font-size: clamp(1.6rem, 4vw, 3rem);
-      font-weight: 900;
-      letter-spacing: -.035em;
-      line-height: .98;
-      color: #fff;
-      margin-top: .75rem;
-    }
-
-    .servicios-header p {
-      font-size: clamp(.8rem, 1.3vw, .9rem);
-      color: var(--text-2);
-      max-width: 34ch;
-      line-height: 1.68;
     }
 
     .servicios-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-      gap: 1px;
-      background: var(--border);
+      gap: 1.25rem;
     }
 
     .servicio-card {
-      background: var(--bg-2);
-      padding: clamp(2rem, 4vw, 3rem);
+      background: var(--bg);
+      border: 1px solid var(--border-c);
+      border-radius: var(--radius);
+      padding: clamp(1.75rem, 3.5vw, 2.25rem);
       display: flex;
       flex-direction: column;
       gap: 1.4rem;
-      transition: background .25s ease;
+      transition: border-color .25s ease, background .25s ease;
     }
-    .servicio-card:hover { background: var(--bg-3); }
+    .servicio-card:hover {
+      border-color: rgba(255,255,255,.2);
+      background: var(--bg-2);
+    }
 
     .servicio-icon {
-      width: 42px;
-      height: 42px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border-c);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -350,21 +380,21 @@
     }
 
     .servicio-card h3 {
-      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      font-size: clamp(1rem, 2vw, 1.25rem);
       font-weight: 700;
       letter-spacing: -.02em;
       color: #fff;
     }
 
     .servicio-card p {
-      font-size: clamp(.8rem, 1.3vw, .9rem);
+      font-size: clamp(.8rem, 1.3vw, .88rem);
       line-height: 1.72;
       color: var(--text-2);
       flex: 1;
     }
 
     .servicio-link {
-      font-size: clamp(.7rem, 1.1vw, .78rem);
+      font-size: .75rem;
       font-weight: 600;
       letter-spacing: .04em;
       color: var(--text-3);
@@ -383,50 +413,37 @@
        PROCESO
     ════════════════════════════════════════════════ */
     #proceso {
-      padding: var(--pad-y) var(--pad-x);
+      padding-block: var(--pad-y);
       border-bottom: 1px solid var(--border);
-    }
-
-    .proceso-header {
-      margin-bottom: clamp(3rem, 7vh, 5rem);
-    }
-
-    .proceso-header h2 {
-      font-size: clamp(1.6rem, 4vw, 3rem);
-      font-weight: 900;
-      letter-spacing: -.035em;
-      line-height: .98;
-      color: #fff;
-      max-width: 22ch;
-      margin-top: .75rem;
     }
 
     .proceso-steps {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-      gap: 1px;
-      background: var(--border);
+      gap: 1.25rem;
     }
 
     .proceso-step {
-      background: var(--bg);
-      padding: clamp(1.75rem, 3.5vw, 2.5rem);
+      background: var(--bg-2);
+      border: 1px solid var(--border-c);
+      border-radius: var(--radius);
+      padding: clamp(1.75rem, 3.5vw, 2.25rem);
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
 
     .proceso-step-num {
-      font-size: 2.8rem;
+      font-size: 3rem;
       font-weight: 900;
-      letter-spacing: -.04em;
-      color: rgba(255,255,255,.05);
+      letter-spacing: -.05em;
+      color: rgba(255,255,255,.06);
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
 
     .proceso-step h3 {
-      font-size: clamp(.92rem, 1.6vw, 1.05rem);
+      font-size: clamp(.9rem, 1.6vw, 1.05rem);
       font-weight: 700;
       letter-spacing: -.01em;
       color: #fff;
@@ -446,50 +463,28 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .work-header {
-      padding: var(--pad-y) var(--pad-x) clamp(3rem, 6vh, 5rem);
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 2rem;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .work-header h2 {
-      font-size: clamp(1.6rem, 4vw, 3rem);
-      font-weight: 900;
-      letter-spacing: -.035em;
-      line-height: .98;
-      color: #fff;
-      margin-top: .75rem;
-    }
-
-    .work-header p {
-      font-size: clamp(.8rem, 1.3vw, .9rem);
-      color: var(--text-2);
-      max-width: 32ch;
-      line-height: 1.68;
-    }
-
     /* ── Portfolio cards ──────────────────────────── */
     .portfolio__grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-      gap: 1px;
-      background: var(--border);
-      border-bottom: 1px solid var(--border);
+      gap: 1.25rem;
+      margin-bottom: clamp(3rem, 7vh, 5rem);
     }
 
     .portfolio__card {
-      background: var(--bg-2);
-      padding: clamp(1.5rem, 4vw, 2.5rem);
+      background: var(--bg);
+      border: 1px solid var(--border-c);
+      border-radius: var(--radius);
+      padding: clamp(1.5rem, 3.5vw, 2.25rem);
       display: flex;
       flex-direction: column;
       gap: 1rem;
-      transition: background .25s ease;
+      transition: border-color .25s ease, background .25s ease;
     }
-    .portfolio__card:hover { background: var(--bg-3); }
+    .portfolio__card:hover {
+      border-color: rgba(255,255,255,.2);
+      background: var(--bg-2);
+    }
 
     .portfolio__card-top {
       display: flex;
@@ -498,18 +493,18 @@
     }
 
     .portfolio__tag {
-      font-size: clamp(.5rem, .85vw, .6rem);
+      font-size: .58rem;
       font-weight: 600;
       letter-spacing: .22em;
       text-transform: uppercase;
       color: var(--text-3);
-      border: 1px solid var(--border);
-      padding: .25rem .6rem;
-      border-radius: 2px;
+      border: 1px solid var(--border-c);
+      padding: .28rem .65rem;
+      border-radius: 6px;
     }
 
     .portfolio__card-num {
-      font-size: clamp(.54rem, .88vw, .64rem);
+      font-size: .62rem;
       font-weight: 700;
       letter-spacing: .15em;
       color: rgba(255,255,255,.1);
@@ -517,16 +512,16 @@
     }
 
     .portfolio__card h3 {
-      font-size: clamp(1.3rem, 3vw, 2rem);
-      font-weight: 900;
-      letter-spacing: -.025em;
+      font-size: clamp(1.25rem, 3vw, 1.85rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
       line-height: 1;
       color: #fff;
     }
 
     .portfolio__card p {
-      font-size: clamp(.8rem, 1.3vw, .9rem);
-      line-height: 1.68;
+      font-size: clamp(.8rem, 1.3vw, .88rem);
+      line-height: 1.7;
       color: var(--text-2);
       flex: 1;
     }
@@ -535,7 +530,7 @@
       display: inline-flex;
       align-items: center;
       gap: .5rem;
-      font-size: clamp(.7rem, 1.1vw, .8rem);
+      font-size: .75rem;
       font-weight: 600;
       letter-spacing: .04em;
       color: var(--text-3);
@@ -549,34 +544,44 @@
     .portfolio__link-arrow { transition: transform .2s ease; }
     .portfolio__link:hover .portfolio__link-arrow { transform: translate(2px, -2px); }
 
+    /* ── Work inner padding ───────────────────────── */
+    #work > .w {
+      padding-block: var(--pad-y);
+    }
+
     /* ── Work subsection header ───────────────────── */
     .work-sub {
-      padding: clamp(2.5rem, 5vh, 4rem) var(--pad-x) clamp(2rem, 4vh, 3rem);
-      border-bottom: 1px solid var(--border);
+      margin-bottom: clamp(2rem, 4vh, 3rem);
+    }
+    .work-sub--spaced {
+      margin-top: clamp(2.5rem, 6vh, 4.5rem);
     }
 
     /* ── Videos ───────────────────────────────────── */
     .videos__grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-      max-width: 960px;
-      margin: 0 auto;
-      border-bottom: 1px solid var(--border);
+      gap: 1.25rem;
+      margin-bottom: clamp(3rem, 7vh, 5rem);
     }
 
     @media (max-width: 768px) {
-      .videos__grid { grid-template-columns: 1fr; max-width: 100%; }
+      .videos__grid { grid-template-columns: 1fr; }
       .video-wrapper { max-height: 75vh; }
     }
-
     @media (orientation: landscape) and (max-height: 500px) {
-      .videos__grid { grid-template-columns: repeat(3, 1fr); max-width: 100%; }
+      .videos__grid { grid-template-columns: repeat(3, 1fr); }
       .video-wrapper { max-height: 60vh; }
     }
 
-    .video-card { background: var(--bg-2); display: flex; flex-direction: column; }
+    .video-card {
+      background: var(--bg);
+      border: 1px solid var(--border-c);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
     .video-wrapper {
       position: relative;
@@ -584,9 +589,8 @@
       padding-bottom: 177.78%;
       height: 0;
       overflow: hidden;
-      background: #0a0a0a;
+      background: #050505;
     }
-
     .video-wrapper iframe {
       position: absolute;
       inset: 0;
@@ -597,21 +601,19 @@
     }
 
     .video-caption {
-      padding: .9rem clamp(1rem, 2.5vw, 1.4rem);
+      padding: .85rem 1.1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: .75rem;
       border-top: 1px solid var(--border);
     }
-
     .video-caption__title {
-      font-size: clamp(.75rem, 1.2vw, .85rem);
+      font-size: .82rem;
       font-weight: 600;
       color: var(--text-2);
       letter-spacing: -.01em;
     }
-
     .video-caption__tag {
       flex-shrink: 0;
       font-size: .5rem;
@@ -619,20 +621,26 @@
       letter-spacing: .2em;
       text-transform: uppercase;
       color: var(--text-3);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-c);
       padding: .22rem .55rem;
-      border-radius: 2px;
+      border-radius: 4px;
     }
 
     /* ── Before/After ─────────────────────────────── */
     .transformations__grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-      gap: 1px;
-      background: var(--border);
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 1.25rem;
     }
 
-    .ba-card { background: var(--bg-2); display: flex; flex-direction: column; }
+    .ba-card {
+      background: var(--bg);
+      border: 1px solid var(--border-c);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
 
     .ba-slider {
       position: relative;
@@ -644,7 +652,7 @@
       user-select: none;
       touch-action: pan-y;
     }
-    .ba-slider:focus-visible { outline: 2px solid rgba(255,255,255,.5); outline-offset: -2px; }
+    .ba-slider:focus-visible { outline: 2px solid rgba(255,255,255,.4); outline-offset: -2px; }
 
     .ba-after, .ba-before {
       position: absolute;
@@ -656,7 +664,6 @@
       display: block;
       pointer-events: none;
     }
-
     .ba-before {
       z-index: 2;
       clip-path: inset(0 calc(100% - var(--split)) 0 0);
@@ -682,14 +689,14 @@
       width: 40px; height: 40px;
       background: #fff;
       border-radius: 50%;
-      box-shadow: 0 2px 14px rgba(0,0,0,.55);
+      box-shadow: 0 2px 14px rgba(0,0,0,.6);
     }
     .ba-handle::after {
       content: '← →';
       position: absolute;
       top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      font-size: .58rem;
+      font-size: .56rem;
       font-weight: 800;
       letter-spacing: -.02em;
       color: #000;
@@ -705,7 +712,7 @@
       letter-spacing: .22em;
       text-transform: uppercase;
       padding: .26rem .6rem;
-      border-radius: 2px;
+      border-radius: 4px;
       -webkit-backdrop-filter: blur(6px);
       backdrop-filter: blur(6px);
       pointer-events: none;
@@ -714,43 +721,48 @@
     .ba-label--after  { right: .85rem; background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.14); }
 
     .ba-caption {
-      padding: .9rem clamp(1rem, 2.5vw, 1.4rem);
+      padding: .85rem 1.1rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: .75rem;
       border-top: 1px solid var(--border);
     }
-    .ba-caption__title { font-size: clamp(.75rem, 1.2vw, .85rem); font-weight: 600; color: var(--text-2); letter-spacing: -.01em; }
-    .ba-caption__tag   { flex-shrink: 0; font-size: .5rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--text-3); border: 1px solid var(--border); padding: .22rem .55rem; border-radius: 2px; }
+    .ba-caption__title { font-size: .82rem; font-weight: 600; color: var(--text-2); letter-spacing: -.01em; }
+    .ba-caption__tag   { flex-shrink: 0; font-size: .5rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--text-3); border: 1px solid var(--border-c); padding: .22rem .55rem; border-radius: 4px; }
 
     /* ════════════════════════════════════════════════
        CONTACTO / CTA
     ════════════════════════════════════════════════ */
     #contact {
-      padding: var(--pad-y) var(--pad-x);
+      padding-block: var(--pad-y);
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: clamp(1.5rem, 3.5vh, 2.5rem);
       border-bottom: 1px solid var(--border);
     }
 
+    .contact-inner {
+      max-width: 680px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(1.25rem, 3vh, 2rem);
+    }
+
     #contact h2 {
-      font-size: clamp(2.2rem, 7vw, 6rem);
+      font-size: clamp(2.2rem, 7vw, 5.5rem);
       font-weight: 900;
       letter-spacing: -.045em;
-      line-height: .92;
+      line-height: .91;
       color: #fff;
-      max-width: 16ch;
     }
-    #contact h2 .dim { color: rgba(255,255,255,.26); }
+    #contact h2 .dim { color: rgba(255,255,255,.22); }
 
-    #contact > p {
+    #contact > .contact-inner > p {
       font-size: clamp(.88rem, 1.5vw, 1rem);
       color: var(--text-2);
-      max-width: 46ch;
+      max-width: 44ch;
       line-height: 1.72;
     }
 
@@ -758,12 +770,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: .85rem;
+      gap: .8rem;
       margin-top: .5rem;
     }
 
     .contact-email {
-      font-size: clamp(.72rem, 1.1vw, .82rem);
+      font-size: .8rem;
       color: var(--text-3);
       letter-spacing: .02em;
     }
@@ -772,7 +784,13 @@
        FOOTER
     ════════════════════════════════════════════════ */
     footer {
-      padding: clamp(1.75rem, 3.5vh, 2.5rem) var(--pad-x);
+      padding-block: clamp(1.75rem, 3.5vh, 2.5rem);
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin-inline: auto;
+      padding-inline: var(--pad-x);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -790,10 +808,10 @@
       width: auto;
       display: block;
       mix-blend-mode: lighten;
-      opacity: 0.3;
+      opacity: 0.28;
       transition: opacity .2s ease;
     }
-    .footer-logo:hover img { opacity: 0.55; }
+    .footer-logo:hover img { opacity: 0.5; }
 
     .footer-links {
       display: flex;
@@ -802,24 +820,22 @@
     }
     .footer-links a {
       font-size: .74rem;
-      color: rgba(255,255,255,.2);
+      color: rgba(255,255,255,.18);
       text-decoration: none;
       transition: color .2s ease;
     }
-    .footer-links a:hover { color: rgba(255,255,255,.55); }
+    .footer-links a:hover { color: rgba(255,255,255,.5); }
 
     .footer-copy {
       font-size: .72rem;
-      color: rgba(255,255,255,.15);
+      color: rgba(255,255,255,.12);
       letter-spacing: .04em;
     }
 
-    @media (max-width: 600px) {
-      .footer-links { display: none; }
-    }
+    @media (max-width: 600px) { .footer-links { display: none; } }
 
     /* ════════════════════════════════════════════════
-       CHATBOT WIDGET
+       CHATBOT
     ════════════════════════════════════════════════ */
     #chat-widget {
       position: fixed;
@@ -830,8 +846,8 @@
     }
 
     #chat-toggle {
-      width: 54px;
-      height: 54px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       background: #fff;
       border: none;
@@ -839,12 +855,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 24px rgba(0,0,0,.45);
+      box-shadow: 0 4px 24px rgba(0,0,0,.5);
       transition: transform .2s ease, box-shadow .2s ease;
       position: relative;
       z-index: 2;
     }
-    #chat-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 32px rgba(0,0,0,.55); }
+    #chat-toggle:hover { transform: scale(1.07); box-shadow: 0 6px 32px rgba(0,0,0,.6); }
     #chat-toggle svg { position: absolute; transition: opacity .2s ease, transform .2s ease; }
     #chat-toggle .icon-chat  { opacity: 1;  transform: scale(1); }
     #chat-toggle .icon-close { opacity: 0;  transform: scale(.7); }
@@ -865,15 +881,15 @@
 
     #chat-panel {
       position: absolute;
-      bottom: 66px; right: 0;
+      bottom: 64px; right: 0;
       width: 360px; height: 500px;
       background: #0d0d0d;
       border: 1px solid rgba(255,255,255,.1);
-      border-radius: 16px;
+      border-radius: 18px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 8px 48px rgba(0,0,0,.6);
+      box-shadow: 0 8px 48px rgba(0,0,0,.7);
       transform: scale(.92) translateY(12px);
       transform-origin: bottom right;
       opacity: 0;
@@ -940,7 +956,7 @@
     .chat-typing span { width: 6px; height: 6px; background: rgba(255,255,255,.4); border-radius: 50%; animation: typingDot 1.2s ease infinite; }
     .chat-typing span:nth-child(2) { animation-delay: .2s; }
     .chat-typing span:nth-child(3) { animation-delay: .4s; }
-    @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-5px); opacity: 1; } }
+    @keyframes typingDot { 0%,60%,100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-5px); opacity: 1; } }
 
     #chat-input-area {
       padding: 12px;
@@ -989,16 +1005,18 @@
      NAV
 ════════════════════════════════════════════════ -->
 <nav id="nav" aria-label="Navegación principal">
-  <a href="#" class="nav-logo">
-    <img src="assets/dys-solutions3-1.png" alt="DYS Solutions" />
-  </a>
-  <ul class="nav-links" role="list">
-    <li><a href="#servicios">Servicios</a></li>
-    <li><a href="#work">Trabajo</a></li>
-    <li><a href="#proceso">Proceso</a></li>
-    <li><a href="#contact">Contacto</a></li>
-  </ul>
-  <a href="#contact" class="nav-cta">Consulta gratuita</a>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <img src="assets/dys-solutions3-1.png" alt="DYS Solutions" />
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#work">Trabajo</a></li>
+      <li><a href="#proceso">Proceso</a></li>
+      <li><a href="#contact">Contacto</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Consulta gratuita</a>
+  </div>
 </nav>
 
 
@@ -1015,7 +1033,7 @@
     <p>Diseñamos y producimos la presencia digital que convierte desconocidos en clientes. Web, vídeo e IA, en un solo estudio.</p>
     <div class="hero-cta-group">
       <a href="#contact" class="btn-primary">Empieza tu proyecto →</a>
-      <a href="#work" class="btn-ghost">Ver nuestro trabajo</a>
+      <a href="#work" class="btn-ghost">Ver nuestro trabajo ↓</a>
     </div>
   </div>
 </section>
@@ -1025,25 +1043,29 @@
      PROBLEMA
 ════════════════════════════════════════════════ -->
 <section id="problema" aria-label="El problema">
-  <div class="problema-intro fade-in">
-    <span class="section-label">El problema</span>
-    <h2>Por qué tu negocio no crece online</h2>
-  </div>
-  <div class="problema-grid">
-    <div class="problema-card fade-in">
-      <span class="problema-num">01</span>
-      <h3>Nadie te encuentra</h3>
-      <p>Sin presencia digital sólida, el cliente nuevo elige a tu competencia antes de conocerte.</p>
+  <div class="w">
+    <div class="section-head fade-in">
+      <div>
+        <span class="section-label">El problema</span>
+        <h2>Por qué tu negocio<br>no crece online</h2>
+      </div>
     </div>
-    <div class="problema-card fade-in">
-      <span class="problema-num">02</span>
-      <h3>No transmites confianza</h3>
-      <p>Una web mediocre o sin contenido audiovisual pierde al cliente antes de la primera llamada.</p>
-    </div>
-    <div class="problema-card fade-in">
-      <span class="problema-num">03</span>
-      <h3>Pareces más pequeño de lo que eres</h3>
-      <p>La imagen digital define cómo te perciben. Antes de conocerte, ya te están juzgando.</p>
+    <div class="problema-grid">
+      <div class="problema-card fade-in">
+        <span class="problema-num">01</span>
+        <h3>Nadie te encuentra</h3>
+        <p>Sin presencia digital sólida, el cliente nuevo elige a tu competencia antes de conocerte.</p>
+      </div>
+      <div class="problema-card fade-in">
+        <span class="problema-num">02</span>
+        <h3>No transmites confianza</h3>
+        <p>Una web mediocre o sin contenido audiovisual pierde al cliente antes de la primera llamada.</p>
+      </div>
+      <div class="problema-card fade-in">
+        <span class="problema-num">03</span>
+        <h3>Pareces más pequeño de lo que eres</h3>
+        <p>La imagen digital define cómo te perciben. Antes de conocerte, ya te están juzgando.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -1053,49 +1075,50 @@
      SERVICIOS
 ════════════════════════════════════════════════ -->
 <section id="servicios" aria-label="Servicios">
-  <div class="servicios-header fade-in">
-    <div>
-      <span class="section-label">01 / Servicios</span>
-      <h2>Lo que hacemos</h2>
-    </div>
-    <p>Todo lo que necesitas para existir y destacar online, en un solo equipo.</p>
-  </div>
-
-  <div class="servicios-grid">
-
-    <div class="servicio-card fade-in">
-      <div class="servicio-icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-        </svg>
+  <div class="w">
+    <div class="section-head fade-in">
+      <div>
+        <span class="section-label">01 / Servicios</span>
+        <h2>Lo que hacemos</h2>
       </div>
-      <h3>Diseño Web</h3>
-      <p>Webs que representan tu negocio con precisión y generan resultados. Rápidas, claras y bien construidas desde el primer día.</p>
-      <a href="#contact" class="servicio-link">Pide presupuesto <span aria-hidden="true">→</span></a>
+      <p>Todo lo que necesitas para existir y destacar online, en un solo equipo.</p>
     </div>
+    <div class="servicios-grid">
 
-    <div class="servicio-card fade-in">
-      <div class="servicio-icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
-        </svg>
+      <div class="servicio-card fade-in">
+        <div class="servicio-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+          </svg>
+        </div>
+        <h3>Diseño Web</h3>
+        <p>Webs que representan tu negocio con precisión y generan resultados. Rápidas, claras y bien construidas desde el primer día.</p>
+        <a href="#contact" class="servicio-link">Pide presupuesto <span aria-hidden="true">→</span></a>
       </div>
-      <h3>Producción de Vídeo</h3>
-      <p>Reels, presentaciones y contenido audiovisual que conecta con tu audiencia. Del rodaje al montaje final, en un solo lugar.</p>
-      <a href="#contact" class="servicio-link">Pide presupuesto <span aria-hidden="true">→</span></a>
-    </div>
 
-    <div class="servicio-card fade-in">
-      <div class="servicio-icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.38)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-        </svg>
+      <div class="servicio-card fade-in">
+        <div class="servicio-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+          </svg>
+        </div>
+        <h3>Producción de Vídeo</h3>
+        <p>Reels, presentaciones y contenido audiovisual que conecta con tu audiencia. Del rodaje al montaje final, en un solo lugar.</p>
+        <a href="#contact" class="servicio-link">Pide presupuesto <span aria-hidden="true">→</span></a>
       </div>
-      <h3>IA Aplicada</h3>
-      <p>Herramientas de inteligencia artificial en tu presencia digital. Escalado de imágenes, restauración de archivos y generación de assets.</p>
-      <a href="#contact" class="servicio-link">Pide presupuesto <span aria-hidden="true">→</span></a>
-    </div>
 
+      <div class="servicio-card fade-in">
+        <div class="servicio-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+          </svg>
+        </div>
+        <h3>IA Aplicada</h3>
+        <p>Herramientas de inteligencia artificial en tu presencia digital. Escalado de imágenes, restauración de archivos y generación de assets.</p>
+        <a href="#contact" class="servicio-link">Pide presupuesto <span aria-hidden="true">→</span></a>
+      </div>
+
+    </div>
   </div>
 </section>
 
@@ -1104,30 +1127,34 @@
      PROCESO
 ════════════════════════════════════════════════ -->
 <section id="proceso" aria-label="Proceso de trabajo">
-  <div class="proceso-header fade-in">
-    <span class="section-label">02 / Cómo trabajamos</span>
-    <h2>Un proceso claro, sin sorpresas</h2>
-  </div>
-  <div class="proceso-steps">
-    <div class="proceso-step fade-in">
-      <span class="proceso-step-num">01</span>
-      <h3>Diagnóstico</h3>
-      <p>Entendemos tu negocio, tu mercado y qué necesitas realmente antes de proponer nada.</p>
+  <div class="w">
+    <div class="section-head fade-in">
+      <div>
+        <span class="section-label">02 / Cómo trabajamos</span>
+        <h2>Un proceso claro,<br>sin sorpresas</h2>
+      </div>
     </div>
-    <div class="proceso-step fade-in">
-      <span class="proceso-step-num">02</span>
-      <h3>Estrategia</h3>
-      <p>Definimos qué construir, para quién y con qué objetivo. Sin relleno, sin pasos innecesarios.</p>
-    </div>
-    <div class="proceso-step fade-in">
-      <span class="proceso-step-num">03</span>
-      <h3>Producción</h3>
-      <p>Diseñamos, desarrollamos y producimos con precisión. Te mantenemos al día en cada etapa.</p>
-    </div>
-    <div class="proceso-step fade-in">
-      <span class="proceso-step-num">04</span>
-      <h3>Lanzamiento</h3>
-      <p>Publicamos, ajustamos y te dejamos en marcha. No desaparecemos después de entregar.</p>
+    <div class="proceso-steps">
+      <div class="proceso-step fade-in">
+        <span class="proceso-step-num">01</span>
+        <h3>Diagnóstico</h3>
+        <p>Entendemos tu negocio, tu mercado y qué necesitas realmente antes de proponer nada.</p>
+      </div>
+      <div class="proceso-step fade-in">
+        <span class="proceso-step-num">02</span>
+        <h3>Estrategia</h3>
+        <p>Definimos qué construir, para quién y con qué objetivo. Sin relleno, sin pasos innecesarios.</p>
+      </div>
+      <div class="proceso-step fade-in">
+        <span class="proceso-step-num">03</span>
+        <h3>Producción</h3>
+        <p>Diseñamos, desarrollamos y producimos con precisión. Te mantenemos al día en cada etapa.</p>
+      </div>
+      <div class="proceso-step fade-in">
+        <span class="proceso-step-num">04</span>
+        <h3>Lanzamiento</h3>
+        <p>Publicamos, ajustamos y te dejamos en marcha. No desaparecemos después de entregar.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -1137,152 +1164,139 @@
      TRABAJO — Portfolio · Vídeos · Antes/Después
 ════════════════════════════════════════════════ -->
 <section id="work" aria-label="Nuestro trabajo">
+  <div class="w">
 
-  <div class="work-header fade-in">
-    <div>
-      <span class="section-label">03 / Nuestro trabajo</span>
-      <h2>Proyectos que ya venden</h2>
+    <div class="section-head fade-in">
+      <div>
+        <span class="section-label">03 / Nuestro trabajo</span>
+        <h2>Proyectos que ya venden</h2>
+      </div>
+      <p>Webs entregadas, en producción y generando resultados reales.</p>
     </div>
-    <p>Webs entregadas, en producción y generando resultados reales.</p>
-  </div>
 
-  <!-- Portfolio -->
-  <div class="portfolio__grid">
-    <article class="portfolio__card fade-in">
-      <div class="portfolio__card-top">
-        <span class="portfolio__tag">Automoción</span>
-        <span class="portfolio__card-num">01</span>
-      </div>
-      <h3>ProCar Sales</h3>
-      <p>Plataforma de compraventa de vehículos con catálogo dinámico, filtros avanzados y contacto directo por WhatsApp.</p>
-      <a href="https://procar-sales.com/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
-        procar-sales.com
-        <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
-      </a>
-    </article>
-    <article class="portfolio__card fade-in">
-      <div class="portfolio__card-top">
-        <span class="portfolio__tag">Fitness &amp; Deporte</span>
-        <span class="portfolio__card-num">02</span>
-      </div>
-      <h3>Madu Box</h3>
-      <p>Web de alto impacto para una sala de boxeo. Diseño directo pensado para convertir visitas en inscripciones.</p>
-      <a href="https://madu-box.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
-        madu-box.vercel.app
-        <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
-      </a>
-    </article>
-    <article class="portfolio__card fade-in">
-      <div class="portfolio__card-top">
-        <span class="portfolio__tag">Servicios Locales</span>
-        <span class="portfolio__card-num">03</span>
-      </div>
-      <h3>Jardines Raúl Aguiló</h3>
-      <p>Presencia digital premium para empresa de jardinería en Mallorca. Fotografía mediterránea, catálogo de servicios y contacto directo.</p>
-      <a href="https://jardines-servicios-r-a.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
-        jardines-servicios-r-a.vercel.app
-        <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
-      </a>
-    </article>
-  </div>
-
-  <!-- Vídeos -->
-  <div class="work-sub fade-in">
-    <span class="section-label">Producción de vídeo · Reels de producción propia</span>
-  </div>
-  <div class="videos__grid">
-    <div class="video-card">
-      <div class="video-wrapper">
-        <iframe
-          src="https://player.vimeo.com/video/1197128377?dnt=1&title=0&byline=0&portrait=0&color=ffffff"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowfullscreen
-          title="Gym Reel — DYS Solutions"
-        ></iframe>
-      </div>
-      <div class="video-caption">
-        <span class="video-caption__title">Gym Reel</span>
-        <span class="video-caption__tag">Fitness</span>
-      </div>
+    <!-- Portfolio -->
+    <div class="portfolio__grid">
+      <article class="portfolio__card fade-in">
+        <div class="portfolio__card-top">
+          <span class="portfolio__tag">Automoción</span>
+          <span class="portfolio__card-num">01</span>
+        </div>
+        <h3>ProCar Sales</h3>
+        <p>Plataforma de compraventa de vehículos con catálogo dinámico, filtros avanzados y contacto directo por WhatsApp.</p>
+        <a href="https://procar-sales.com/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
+          procar-sales.com
+          <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
+        </a>
+      </article>
+      <article class="portfolio__card fade-in">
+        <div class="portfolio__card-top">
+          <span class="portfolio__tag">Fitness &amp; Deporte</span>
+          <span class="portfolio__card-num">02</span>
+        </div>
+        <h3>Madu Box</h3>
+        <p>Web de alto impacto para una sala de boxeo. Diseño directo pensado para convertir visitas en inscripciones.</p>
+        <a href="https://madu-box.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
+          madu-box.vercel.app
+          <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
+        </a>
+      </article>
+      <article class="portfolio__card fade-in">
+        <div class="portfolio__card-top">
+          <span class="portfolio__tag">Servicios Locales</span>
+          <span class="portfolio__card-num">03</span>
+        </div>
+        <h3>Jardines Raúl Aguiló</h3>
+        <p>Presencia digital premium para empresa de jardinería en Mallorca. Fotografía mediterránea y contacto directo.</p>
+        <a href="https://jardines-servicios-r-a.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio__link">
+          jardines-servicios-r-a.vercel.app
+          <span class="portfolio__link-arrow" aria-hidden="true">↗</span>
+        </a>
+      </article>
     </div>
-    <div class="video-card">
-      <div class="video-wrapper">
-        <iframe
-          src="https://player.vimeo.com/video/1197128994?dnt=1&title=0&byline=0&portrait=0&color=ffffff"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowfullscreen
-          title="Videoclip Reel — DYS Solutions"
-        ></iframe>
-      </div>
-      <div class="video-caption">
-        <span class="video-caption__title">Videoclip Reel</span>
-        <span class="video-caption__tag">Música</span>
-      </div>
-    </div>
-    <div class="video-card">
-      <div class="video-wrapper">
-        <iframe
-          src="https://player.vimeo.com/video/1197129098?dnt=1&title=0&byline=0&portrait=0&color=ffffff"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowfullscreen
-          title="Documental Reel — DYS Solutions"
-        ></iframe>
-      </div>
-      <div class="video-caption">
-        <span class="video-caption__title">Documental Reel</span>
-        <span class="video-caption__tag">Documental</span>
-      </div>
-    </div>
-  </div>
 
-  <!-- Antes / Después -->
-  <div class="work-sub fade-in" style="border-top:1px solid rgba(255,255,255,.07)">
-    <span class="section-label">Edición Avanzada · Reconstrucción IA — Arrastra para comparar</span>
-  </div>
-  <div class="transformations__grid">
-
-    <div class="ba-card">
-      <div class="ba-slider" tabindex="0" role="img" aria-label="Antes y después: Acceso con palmeras, Mallorca">
-        <img class="ba-after"  src="assets/palmeras.png"  alt="Después: Acceso con palmeras, colores cinemáticos y composición ampliada con IA" loading="lazy" decoding="async" />
-        <img class="ba-before" src="assets/palmeras.jpeg" alt="Antes: Fotografía original vertical tomada desde móvil" loading="lazy" decoding="async" />
-        <div class="ba-handle" aria-hidden="true"></div>
-        <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
-        <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+    <!-- Vídeos -->
+    <div class="work-sub fade-in">
+      <span class="section-label">Producción de vídeo · Reels de producción propia</span>
+    </div>
+    <div class="videos__grid">
+      <div class="video-card">
+        <div class="video-wrapper">
+          <iframe src="https://player.vimeo.com/video/1197128377?dnt=1&title=0&byline=0&portrait=0&color=ffffff" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Gym Reel — DYS Solutions"></iframe>
+        </div>
+        <div class="video-caption">
+          <span class="video-caption__title">Gym Reel</span>
+          <span class="video-caption__tag">Fitness</span>
+        </div>
       </div>
-      <div class="ba-caption">
-        <span class="ba-caption__title">Acceso con palmeras · Mallorca</span>
-        <span class="ba-caption__tag">Reconstrucción IA</span>
+      <div class="video-card">
+        <div class="video-wrapper">
+          <iframe src="https://player.vimeo.com/video/1197128994?dnt=1&title=0&byline=0&portrait=0&color=ffffff" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Videoclip Reel — DYS Solutions"></iframe>
+        </div>
+        <div class="video-caption">
+          <span class="video-caption__title">Videoclip Reel</span>
+          <span class="video-caption__tag">Música</span>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-wrapper">
+          <iframe src="https://player.vimeo.com/video/1197129098?dnt=1&title=0&byline=0&portrait=0&color=ffffff" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Documental Reel — DYS Solutions"></iframe>
+        </div>
+        <div class="video-caption">
+          <span class="video-caption__title">Documental Reel</span>
+          <span class="video-caption__tag">Documental</span>
+        </div>
       </div>
     </div>
 
-    <div class="ba-card">
-      <div class="ba-slider" tabindex="0" role="img" aria-label="Antes y después: Jardín privado con vistas al mar">
-        <img class="ba-after"  src="assets/palmeras5.png"  alt="Después: Jardín privado con palmera y vistas al Mediterráneo, editado con IA" loading="lazy" decoding="async" />
-        <img class="ba-before" src="assets/palmeras5.jpeg" alt="Antes: Fotografía original vertical tomada desde móvil" loading="lazy" decoding="async" />
-        <div class="ba-handle" aria-hidden="true"></div>
-        <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
-        <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
-      </div>
-      <div class="ba-caption">
-        <span class="ba-caption__title">Jardín privado · Vistas al mar</span>
-        <span class="ba-caption__tag">Edición Avanzada</span>
-      </div>
+    <!-- Antes / Después -->
+    <div class="work-sub work-sub--spaced fade-in">
+      <span class="section-label">Edición Avanzada · Reconstrucción IA — Arrastra para comparar</span>
     </div>
+    <div class="transformations__grid">
 
-    <div class="ba-card">
-      <div class="ba-slider" tabindex="0" role="img" aria-label="Antes y después: Piscina comunitaria, Mallorca">
-        <img class="ba-after"  src="assets/piscina-jardin2.png"  alt="Después: Piscina comunitaria con colores vivos y composición mejorada" loading="lazy" decoding="async" />
-        <img class="ba-before" src="assets/piscina-jardin2.jpeg" alt="Antes: Fotografía original tomada desde móvil" loading="lazy" decoding="async" />
-        <div class="ba-handle" aria-hidden="true"></div>
-        <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
-        <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+      <div class="ba-card">
+        <div class="ba-slider" tabindex="0" role="img" aria-label="Antes y después: Acceso con palmeras, Mallorca">
+          <img class="ba-after"  src="assets/palmeras.webp"  alt="Después: Acceso con palmeras, colores cinemáticos y composición ampliada con IA" loading="lazy" decoding="async" />
+          <img class="ba-before" src="assets/palmeras.jpeg"  alt="Antes: Fotografía original vertical tomada desde móvil" loading="lazy" decoding="async" />
+          <div class="ba-handle" aria-hidden="true"></div>
+          <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
+          <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+        </div>
+        <div class="ba-caption">
+          <span class="ba-caption__title">Acceso con palmeras · Mallorca</span>
+          <span class="ba-caption__tag">Reconstrucción IA</span>
+        </div>
       </div>
-      <div class="ba-caption">
-        <span class="ba-caption__title">Piscina comunitaria · Mallorca</span>
-        <span class="ba-caption__tag">Reconstrucción IA</span>
+
+      <div class="ba-card">
+        <div class="ba-slider" tabindex="0" role="img" aria-label="Antes y después: Jardín privado con vistas al mar">
+          <img class="ba-after"  src="assets/palmeras5.webp"  alt="Después: Jardín privado con palmera y vistas al Mediterráneo, editado con IA" loading="lazy" decoding="async" />
+          <img class="ba-before" src="assets/palmeras5.jpeg"  alt="Antes: Fotografía original vertical tomada desde móvil" loading="lazy" decoding="async" />
+          <div class="ba-handle" aria-hidden="true"></div>
+          <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
+          <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+        </div>
+        <div class="ba-caption">
+          <span class="ba-caption__title">Jardín privado · Vistas al mar</span>
+          <span class="ba-caption__tag">Edición Avanzada</span>
+        </div>
       </div>
+
+      <div class="ba-card">
+        <div class="ba-slider" tabindex="0" role="img" aria-label="Antes y después: Piscina comunitaria, Mallorca">
+          <img class="ba-after"  src="assets/piscina-jardin2.webp"  alt="Después: Piscina comunitaria con colores vivos y composición mejorada" loading="lazy" decoding="async" />
+          <img class="ba-before" src="assets/piscina-jardin2.jpeg"  alt="Antes: Fotografía original tomada desde móvil" loading="lazy" decoding="async" />
+          <div class="ba-handle" aria-hidden="true"></div>
+          <span class="ba-label ba-label--before" aria-hidden="true">Antes</span>
+          <span class="ba-label ba-label--after"  aria-hidden="true">Después</span>
+        </div>
+        <div class="ba-caption">
+          <span class="ba-caption__title">Piscina comunitaria · Mallorca</span>
+          <span class="ba-caption__tag">Reconstrucción IA</span>
+        </div>
+      </div>
+
     </div>
-
   </div>
 </section>
 
@@ -1291,12 +1305,14 @@
      CONTACTO / CTA FINAL
 ════════════════════════════════════════════════ -->
 <section id="contact" aria-label="Contacto">
-  <span class="section-label">¿Empezamos?</span>
-  <h2 class="fade-in">¿Listo para <span class="dim">existir online?</span></h2>
-  <p class="fade-in">Consulta gratuita, sin compromiso. Analizamos tu situación y te decimos exactamente qué necesitas.</p>
-  <div class="contact-actions fade-in">
-    <a href="mailto:hola@dyssolutions.com" class="btn-primary">Habla con nosotros →</a>
-    <span class="contact-email">hola@dyssolutions.com</span>
+  <div class="contact-inner">
+    <span class="section-label">¿Empezamos?</span>
+    <h2 class="fade-in">¿Listo para <span class="dim">existir online?</span></h2>
+    <p class="fade-in">Consulta gratuita, sin compromiso. Analizamos tu situación y te decimos exactamente qué necesitas.</p>
+    <div class="contact-actions fade-in">
+      <a href="mailto:hola@dyssolutions.com" class="btn-primary">Habla con nosotros →</a>
+      <span class="contact-email">hola@dyssolutions.com</span>
+    </div>
   </div>
 </section>
 
@@ -1305,16 +1321,18 @@
      FOOTER
 ════════════════════════════════════════════════ -->
 <footer>
-  <a href="#" class="footer-logo">
-    <img src="assets/dys-solutions3-1.png" alt="DYS Solutions" />
-  </a>
-  <ul class="footer-links" role="list">
-    <li><a href="#servicios">Servicios</a></li>
-    <li><a href="#work">Trabajo</a></li>
-    <li><a href="#proceso">Proceso</a></li>
-    <li><a href="#contact">Contacto</a></li>
-  </ul>
-  <span class="footer-copy">© 2025 DYS Solutions</span>
+  <div class="footer-inner">
+    <a href="#" class="footer-logo">
+      <img src="assets/dys-solutions3-1.png" alt="DYS Solutions" />
+    </a>
+    <ul class="footer-links" role="list">
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#work">Trabajo</a></li>
+      <li><a href="#proceso">Proceso</a></li>
+      <li><a href="#contact">Contacto</a></li>
+    </ul>
+    <span class="footer-copy">© 2025 DYS Solutions</span>
+  </div>
 </footer>
 
 
@@ -1322,7 +1340,6 @@
      CHATBOT WIDGET
 ════════════════════════════════════════════════ -->
 <div id="chat-widget" role="complementary" aria-label="Asistente DYS Solutions">
-
   <button id="chat-toggle" type="button" aria-label="Abrir chat con DYS Solutions" aria-expanded="false">
     <svg class="icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -1342,13 +1359,7 @@
     </div>
     <div id="chat-messages" role="log" aria-live="polite" aria-label="Mensajes del chat"></div>
     <div id="chat-input-area">
-      <textarea
-        id="chat-input"
-        placeholder="Escribe tu pregunta..."
-        rows="1"
-        aria-label="Mensaje"
-        maxlength="600"
-      ></textarea>
+      <textarea id="chat-input" placeholder="Escribe tu pregunta..." rows="1" aria-label="Mensaje" maxlength="600"></textarea>
       <button id="chat-send" type="button" aria-label="Enviar mensaje" disabled>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
@@ -1365,12 +1376,9 @@
 <script>
 (function () {
   'use strict';
-  const io = new IntersectionObserver(function (entries) {
+  var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
+      if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
     });
   }, { threshold: 0.08 });
   document.querySelectorAll('.fade-in').forEach(function (el) { io.observe(el); });
@@ -1384,38 +1392,26 @@
 <script>
 (function () {
   'use strict';
-
   function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
-
   document.querySelectorAll('.ba-slider').forEach(function (slider) {
-    var handle  = slider.querySelector('.ba-handle');
+    var handle = slider.querySelector('.ba-handle');
     var dragging = false;
-
     function setPosition(clientX) {
       var rect = slider.getBoundingClientRect();
-      var pct  = clamp(((clientX - rect.left) / rect.width) * 100, 2, 98);
-      slider.style.setProperty('--split', pct + '%');
+      slider.style.setProperty('--split', clamp(((clientX - rect.left) / rect.width) * 100, 2, 98) + '%');
     }
-
     handle.addEventListener('mousedown', function (e) { dragging = true; e.preventDefault(); });
     window.addEventListener('mouseup',   function ()  { dragging = false; });
     window.addEventListener('mousemove', function (e) { if (dragging) setPosition(e.clientX); });
-
     slider.addEventListener('touchstart', function (e) { dragging = true; setPosition(e.touches[0].clientX); }, { passive: true });
     slider.addEventListener('touchend',   function ()  { dragging = false; });
-    slider.addEventListener('touchmove',  function (e) {
-      if (!dragging) return;
-      setPosition(e.touches[0].clientX);
-      e.preventDefault();
-    }, { passive: false });
-
+    slider.addEventListener('touchmove',  function (e) { if (!dragging) return; setPosition(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
     slider.addEventListener('click', function (e) { setPosition(e.clientX); });
-
     slider.addEventListener('keydown', function (e) {
-      var current = parseFloat(slider.style.getPropertyValue('--split') || '50');
-      var step    = e.shiftKey ? 10 : 5;
-      if (e.key === 'ArrowLeft')  { slider.style.setProperty('--split', clamp(current - step, 2, 98) + '%'); e.preventDefault(); }
-      if (e.key === 'ArrowRight') { slider.style.setProperty('--split', clamp(current + step, 2, 98) + '%'); e.preventDefault(); }
+      var cur = parseFloat(slider.style.getPropertyValue('--split') || '50');
+      var step = e.shiftKey ? 10 : 5;
+      if (e.key === 'ArrowLeft')  { slider.style.setProperty('--split', clamp(cur - step, 2, 98) + '%'); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { slider.style.setProperty('--split', clamp(cur + step, 2, 98) + '%'); e.preventDefault(); }
     });
   });
 })();
@@ -1429,20 +1425,17 @@
 (function () {
   'use strict';
 
-  const widget   = document.getElementById('chat-widget');
-  const toggle   = document.getElementById('chat-toggle');
-  const panel    = document.getElementById('chat-panel');
-  const messages = document.getElementById('chat-messages');
-  const input    = document.getElementById('chat-input');
-  const sendBtn  = document.getElementById('chat-send');
+  var widget   = document.getElementById('chat-widget');
+  var toggle   = document.getElementById('chat-toggle');
+  var panel    = document.getElementById('chat-panel');
+  var messages = document.getElementById('chat-messages');
+  var input    = document.getElementById('chat-input');
+  var sendBtn  = document.getElementById('chat-send');
 
-  let isOpen      = false;
-  let isSending   = false;
-  let initialized = false;
-  const history   = [];
-
-  const MAX_HISTORY = 20;
-  const WELCOME     = 'Hola 👋 Soy el asistente de DYS Solutions. ¿Tienes algún proyecto en mente o quieres saber más sobre lo que hacemos?';
+  var isOpen = false, isSending = false, initialized = false;
+  var history = [];
+  var MAX_HISTORY = 20;
+  var WELCOME = 'Hola 👋 Soy el asistente de DYS Solutions. ¿Tienes algún proyecto en mente o quieres saber más sobre lo que hacemos?';
 
   function openChat() {
     isOpen = true;
@@ -1452,7 +1445,6 @@
     if (!initialized) { initialized = true; addMessage(WELCOME, 'assistant'); }
     setTimeout(function () { input.focus(); }, 260);
   }
-
   function closeChat() {
     isOpen = false;
     widget.classList.remove('open');
@@ -1471,7 +1463,6 @@
     scrollBottom();
     return el;
   }
-
   function addTyping() {
     var el = document.createElement('div');
     el.className = 'chat-typing';
@@ -1481,100 +1472,65 @@
     scrollBottom();
     return el;
   }
-
   function scrollBottom() { messages.scrollTop = messages.scrollHeight; }
-
-  function setLoading(loading) {
-    isSending = loading;
-    sendBtn.disabled = loading;
-    input.disabled   = loading;
-  }
+  function setLoading(v) { isSending = v; sendBtn.disabled = v; input.disabled = v; }
 
   input.addEventListener('input', function () {
     input.style.height = 'auto';
     input.style.height = Math.min(input.scrollHeight, 100) + 'px';
     sendBtn.disabled = isSending || input.value.trim().length === 0;
   });
-
   input.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (!isSending && input.value.trim()) sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!isSending && input.value.trim()) sendMessage(); }
   });
+  sendBtn.addEventListener('click', function () { if (!isSending && input.value.trim()) sendMessage(); });
 
-  sendBtn.addEventListener('click', function () {
-    if (!isSending && input.value.trim()) sendMessage();
-  });
-
-  /* ── Lead capture ─────────────────────────────── */
   var leadCaptured = false;
-
   function detectAndCaptureLead(text) {
     if (leadCaptured) return;
     var match = text.match(/===LEAD_CAPTURADO===([\s\S]*?)===FIN_LEAD===/);
     if (!match) return;
-
     leadCaptured = true;
     var block   = match[1];
-    var name    = (block.match(/Nombre:\s*(.+)/)   || [])[1] || '';
-    var email   = (block.match(/Email:\s*(.+)/)    || [])[1] || '';
-    var summary = (block.match(/Resumen:\s*([\s\S]+?)(?:\n===|$)/) || [])[1] || '';
-    name    = name.trim();
-    email   = email.trim();
-    summary = summary.trim();
-
+    var name    = ((block.match(/Nombre:\s*(.+)/)   || [])[1] || '').trim();
+    var email   = ((block.match(/Email:\s*(.+)/)    || [])[1] || '').trim();
+    var summary = ((block.match(/Resumen:\s*([\s\S]+?)(?:\n===|$)/) || [])[1] || '').trim();
     var msgs = document.querySelectorAll('.chat-msg.assistant');
     var last = msgs[msgs.length - 1];
-    if (last) {
-      last.textContent = last.textContent
-        .replace(/===LEAD_CAPTURADO===[\s\S]*?===FIN_LEAD===/g, '')
-        .trim();
-    }
-
+    if (last) last.textContent = last.textContent.replace(/===LEAD_CAPTURADO===[\s\S]*?===FIN_LEAD===/g, '').trim();
     fetch('/api/lead', {
-      method:  'POST',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ name: name, email: email, summary: summary, conversation: history.filter(function (m) { return m.role !== 'system'; }) }),
+      body: JSON.stringify({ name: name, email: email, summary: summary, conversation: history.filter(function (m) { return m.role !== 'system'; }) }),
     }).catch(function () {});
   }
 
-  /* ── Send message ─────────────────────────────── */
   async function sendMessage() {
     var text = input.value.trim();
     if (!text || isSending) return;
-
     if (history.length >= MAX_HISTORY) {
       addMessage('Esta conversación ha alcanzado su límite. Escríbenos directamente a hola@dyssolutions.com', 'assistant');
       setLoading(true);
       return;
     }
-
     addMessage(text, 'user');
     history.push({ role: 'user', content: text });
-
     input.value = '';
     input.style.height = 'auto';
     setLoading(true);
-
     var typing = addTyping();
-
     try {
       var res = await fetch('/api/chat', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history }),
       });
-
       typing.remove();
       if (!res.ok) throw new Error('HTTP ' + res.status);
-
-      var reader  = res.body.getReader();
+      var reader = res.body.getReader();
       var decoder = new TextDecoder();
-      var buffer  = '';
-      var fullText = '';
-      var aiEl    = addMessage('', 'assistant');
-
+      var buffer = '', fullText = '';
+      var aiEl = addMessage('', 'assistant');
       outer: while (true) {
         var chunk = await reader.read();
         if (chunk.done) break;
@@ -1586,28 +1542,18 @@
           if (!line.startsWith('data: ')) continue;
           var data = line.slice(6).trim();
           if (data === '[DONE]') break outer;
-          try {
-            var delta = JSON.parse(data)?.choices?.[0]?.delta?.content || '';
-            if (delta) { fullText += delta; aiEl.textContent = fullText; scrollBottom(); }
-          } catch (e) {}
+          try { var delta = JSON.parse(data)?.choices?.[0]?.delta?.content || ''; if (delta) { fullText += delta; aiEl.textContent = fullText; scrollBottom(); } } catch (e) {}
         }
       }
-
-      if (fullText) {
-        history.push({ role: 'assistant', content: fullText });
-        detectAndCaptureLead(fullText);
-      }
-
+      if (fullText) { history.push({ role: 'assistant', content: fullText }); detectAndCaptureLead(fullText); }
     } catch (err) {
       typing.remove();
       addMessage('Ha habido un error. Por favor intenta de nuevo o escríbenos a hola@dyssolutions.com', 'assistant');
       if (history.length && history[history.length - 1].role === 'user') history.pop();
     }
-
     setLoading(false);
     input.focus();
   }
-
 })();
 </script>
 
