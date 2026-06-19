@@ -23,13 +23,19 @@
     <a href="index.html" class="nav-logo">
       <img src="assets/dys-solutions3-1.png" alt="DYS Solutions" />
     </a>
-    <ul class="nav-links" role="list">
+    <ul class="nav-links" id="nav-links" role="list">
       <li><a href="webs.html">Webs</a></li>
       <li><a href="video.html">Vídeo</a></li>
       <li><a href="redes-sociales.html">Redes Sociales</a></li>
       <li><a href="index.html#work">Trabajo</a></li>
+      <li class="nav-links-cta"><a href="https://wa.me/34652046862?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20vuestros%20servicios" target="_blank" rel="noopener noreferrer">Hablar por WhatsApp →</a></li>
     </ul>
-    <a href="https://wa.me/34652046862?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20vuestros%20servicios" target="_blank" rel="noopener noreferrer" class="nav-cta">Hablar por WhatsApp</a>
+    <div class="nav-right">
+      <a href="https://wa.me/34652046862?text=Hola%2C%20quiero%20informaci%C3%B3n%20sobre%20vuestros%20servicios" target="_blank" rel="noopener noreferrer" class="nav-cta">Hablar por WhatsApp</a>
+      <button type="button" class="nav-toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-links">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -184,6 +190,21 @@
     });
   }, { threshold: 0.08 });
   document.querySelectorAll('.fade-in').forEach(function (el) { io.observe(el); });
+
+  var navToggle = document.getElementById('nav-toggle');
+  var navLinks  = document.getElementById('nav-links');
+  if (navToggle && navLinks) {
+    navToggle.addEventListener('click', function () {
+      var isOpen = navLinks.classList.toggle('is-open');
+      navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    navLinks.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') {
+        navLinks.classList.remove('is-open');
+        navToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
 })();
 </script>
 
