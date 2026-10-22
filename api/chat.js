@@ -98,7 +98,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model:       'deepseek-flash',
+        model:       'deepseek-v4-flash',
         messages:    [{ role: 'system', content: SYSTEM_PROMPT }, ...clean],
         stream:      true,
         max_tokens:  MAX_TOKENS_OUT,
