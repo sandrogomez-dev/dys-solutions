@@ -17,7 +17,11 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  const { name, email, summary, conversation } = req.body || {};
+  let body = req.body;
+  if (typeof body === 'string') {
+    try { body = JSON.parse(body); } catch (_) { body = {}; }
+  }
+  const { name, email, summary, conversation } = body || {};
 
   if (!name || !email) {
     return res.status(400).json({ error: 'name and email required' });
