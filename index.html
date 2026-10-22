@@ -586,7 +586,12 @@
         body: JSON.stringify({ messages: history }),
       });
       typing.remove();
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (!res.ok) {
+        var errBody = '';
+        try { errBody = await res.text(); } catch (e) {}
+        console.error('Error en /api/chat:', res.status, errBody);
+        throw new Error('HTTP ' + res.status);
+      }
       var reader = res.body.getReader();
       var decoder = new TextDecoder();
       var buffer = '', fullText = '';
